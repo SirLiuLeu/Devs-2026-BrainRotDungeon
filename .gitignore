@@ -1,8 +1,13 @@
-# Project place file
-/rojo2.rbxlx
-
-# Roblox Studio lock files
-/*.rbxlx.lock
-/*.rbxl.lock
-
+# Rojo
+*.rbxl
+*.rbxlx
+*.rbxm
+*.rbxmx
 sourcemap.json
+
+# Roblox Studio temp
+*.lock
+*.meta.json
+
+# Packages
+node_modules

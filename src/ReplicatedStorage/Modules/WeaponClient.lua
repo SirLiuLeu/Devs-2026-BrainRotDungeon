@@ -62,16 +62,15 @@ function WeaponClient:PlayAttack(attackName, animId, trail, Cooldown)
 	local hitTime = track.Length * 0.35
 
 	task.delay(hitTime, function()
-		Trail.Enabled = true
+		self.Trail.Enabled = true
 		Remote:FireServer("Hit", attackName)
 	end)
 
 	task.delay(hitTime + trail, function()
-		Trail.Enabled = false
+		self.Trail.Enabled = false
 	end)
 
 	task.delay(Cooldown, function()
-		print(Cooldown)
 		self.canAttack = true
 	end)
 end
