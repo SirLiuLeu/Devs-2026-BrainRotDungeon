@@ -1,0 +1,17 @@
+{
+  "name": "rojo2",
+  "tree": {
+    "$className": "DataModel",
+    "ServerScriptService": {
+      "$path": "src/ServerScriptService"
+    },
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "$path": "src/StarterPlayerScripts"
+      }
+    },
+    "ReplicatedStorage": {
+      "$path": "src/ReplicatedStorage"
+    }
+  }
+}
