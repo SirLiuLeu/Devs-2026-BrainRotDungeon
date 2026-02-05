@@ -2,11 +2,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Remote = ReplicatedStorage.Remotes.UseSkill
 
 local Cooldown = {}
-local COOLDOWN_TIME = 3
+local COOLDOWN_TIME = 1.5
 Remote.OnServerEvent:Connect(function(player, mode, skillName)
-	print("Server: ", mode, skillName, player.Name)
 	if mode ~= "Hit" then return end
-
 	-- cooldown
 	if Cooldown[player] then return end
 	Cooldown[player] = true
@@ -16,7 +14,7 @@ Remote.OnServerEvent:Connect(function(player, mode, skillName)
 
 	local hrp = char:FindFirstChild("HumanoidRootPart")
 	if not hrp then return end
-
+    
 	-- damage
 	if workspace:FindFirstChild("Enemies") then
 		for _, enemy in pairs(workspace.Enemies:GetChildren()) do
@@ -24,10 +22,9 @@ Remote.OnServerEvent:Connect(function(player, mode, skillName)
 			local erp = enemy:FindFirstChild("HumanoidRootPart")
 			if eh and erp then
 				local dist = (erp.Position - hrp.Position).Magnitude
-				if dist <= 6 then
-					eh:TakeDamage(25)
-					
-                    print("Damaged ", enemy.Name)
+                print("Distance to ", enemy.Name, ": ", dist)
+				if dist <= 20 then
+					eh:TakeDamage(25)				
 				end
 			end
 		end
