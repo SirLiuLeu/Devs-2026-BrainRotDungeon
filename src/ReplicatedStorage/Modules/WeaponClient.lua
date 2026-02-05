@@ -57,6 +57,7 @@ function WeaponClient:PlayAttack(attackName, animId, trail, Cooldown)
 
 	local track = self.Animator:LoadAnimation(anim)
 	track.Priority = Enum.AnimationPriority.Action
+	track.Looped = false
 	track:Play()
 
 	local hitTime = track.Length * 0.35
