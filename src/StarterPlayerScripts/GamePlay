@@ -1,0 +1,249 @@
+BRAINROT DUNGEON — CODEX BUILD SPEC
+1. Core Loop
+Player enters dungeon
+ → kill Brainrot
+   → gain Exp + Gold (+ chance Bone)
+     → upgrade gear / pet / stats
+       → fight Elite
+         → fight Boss
+           → rebirth to scale progression
+
+Auto Farm chỉ là hành động thay thế attack của player.
+
+2. Auto Farm System
+Goal: Player tự tìm và đánh quái gần nhất
+Behavior:
+When AutoFarm = ON:
+    find nearest enemy within detection range
+    move toward enemy
+    attack using normal attack cooldown
+
+Restrictions:
+    chỉ dùng basic attack
+    không dùng skill
+    vẫn nhận drop như bình thường
+
+3. Enemy Types
+3.1 Brainrot (Normal)
+Config:
+    Damage
+    RangeAttack
+    HP
+    Cooldown (default = 1s)
+    AttackType = SingleTarget
+Drop:
+    Exp
+    Gold
+    Low chance Bone
+3.2 Elite Brainrot
+Spawn random
+Drop:
+    Exp
+    Gold
+    Bone
+    HP Item
+3.3 Boss Brainrot
+Abilities: AOE damage skill
+Reward rule:
+    LastHitPlayer → 50% Bone + buff item
+    Remaining Bone → distributed by damage contribution
+    All → Exp + Gold
+
+4. Player Progression
+Level
+Gain Exp → Level Up
+Each level → +10 stat points
+Level requirement unlock higher weapons
+
+Stats allocation
+
+Player can distribute points into own attributes (no limit specified).
+
+5. Equipment System
+Upgrade Star
+3 same equipment → chance upgrade star
+Star range: 1 → 5
+Each star → increase % attributes
+
+Rarity
+Tier	Random Stats Count
+Normal	1
+Unnormal	2
+Rare	3
+Epic	4
+Legendary	4 + Lucky
+
+Possible random attributes:
+    +Exp
+    +Damage
+    +Gold
+    +Armor
+    +HP
+    +Lifesteal%
+    +HP Regen
+
+6. Pet System
+Player can summon mini Brainrot after defeating them.
+Pet effects:
+    Increase player damage
+    Increase player HP
+    Pet level up using Bone
+
+7. Rebirth System
+Reset level to lower value
+Reset exp bar to 0%
+
+For each rebirth:
+    -10 level
+    -10 stats each type
+    +10% Gold gain permanently
+    +10% Exp gain permanently
+
+Infinite rebirth allowed
+
+8. Currency System
+Earn
+    Action	Reward
+    Kill Brainrot	Exp + Gold (+ chance Bone)
+    Kill Elite	Exp + Gold + Bone 
+    Kill Boss	Exp + Gold + Bone + HP, Lucky item, Items (unormal, race, epic)
+    Spend
+
+Gold:
+    Upgrade equipment
+    Buy HP items
+    Upgrade skills
+
+
+Bone:
+    Buy equipment
+    Upgrade pet, Skill
+    Exchange to Gold
+
+9. Skill System
+
+    Player equips:
+    1 Active
+    1 Passive
+
+    Active Skills
+    Fixed damage
+    Fixed heal
+    Speed buff
+    Stun / Freeze (2s)
+
+    Passive Skills
+    Heal over time (1–3%/s)
+    Damage increase (10–20%)
+    HP increase (20–40%)
+
+    Upgrade cost: Bone
+
+10. Shop & Monetization
+Premium Vip: Boost in 7 day
+    +25% Exp
+    +25% Gold
+    +25% Bone
+    + Bone = level * rebirth  * 10 ( tùy theo gói, mua nhiều rẻ hơn)
+    + +1 Legendary items
+
+Paid items:
+    Exp boost
+    Gold boost
+    Move speed boost
+    HP potions
+    Pet lifesteal ability
+    Gacha legendary equipment
+
+11. Ranking
+Leaderboard categories:
+    Level
+    Diamond farm
+    Power score
+        Power score formula based on:
+            Level
+            Equipment
+            Rebirth count
+--------------------
+Thêm phần 12 — GAME ENGINE RULES (QUAN TRỌNG NHẤT)
+
+12. Server Authority Rules
+Combat
+All damage is calculated on SERVER only.
+Client responsibilities:
+    send attack intent
+    play animation
+    display effects
+Server responsibilities:
+    validate cooldown
+    detect hit
+    apply damage
+    calculate drops
+    distribute rewards
+Client never decides:
+    damage
+    drop
+    exp
+    gold
+    Movement
+
+Player movement → client controlled
+Monster movement → server controlled
+
+Auto Farm:
+    client sends "AutoAttackIntent"
+    server controls target selection and attack execution
+    Cooldown
+    Cooldown is owned by server.
+    Client may predict cooldown for UI
+    but server is final authority.
+    Rewards
+
+Server calculates:
+    exp
+    gold
+    bone
+    item drop
+    Server sends result to client
+    Boss Damage Contribution
+Server tracks:
+    PlayerDamage[UserId] += damage
+On boss death:
+    LastHitPlayer gets 50% bone
+    Remaining distributed proportionally
+    Data Storage
+Server owns player data:
+    PlayerData:
+    Level
+    Exp
+    Gold
+    Bone
+    Stats
+    Equipment
+    Rebirth
+    Skills
+    Pet
+Client only receives a copy (readonly)
+Anti Exploit Rule
+If client sends attack faster than cooldown:
+    ignore request
+If client sends damage:
+    ignore
+If client sends drop:
+    ignore
+
+Build architecture MMORPG theo pattern chuẩn:
+
+Client
+    Input → RequestAction
+
+Server
+    Validate → Simulate → Result
+
+Client
+    Display Result
+
+
+Tức là:
+
+game tự động có architecture MMORPG chuẩn
