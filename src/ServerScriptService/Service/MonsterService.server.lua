@@ -77,10 +77,41 @@ local function attack(target)
 	if not attackTrack.IsPlaying then
 		attackTrack:Play()
 	end
+    if not monster
+		or not monster:IsDescendantOf(workspace.Enemies)
+		or not monster.PrimaryPart then
+		return
+	end
 
 	local hum = target:FindFirstChild("Humanoid")
+	if not hum or hum.Health <= 0 then return end
+
+	-- LẤY CONFIG TỪ SERVER
+	local config = monster:FindFirstChild("Config")
+	if not config then return end
+
+	local damageValue = config:FindFirstChild("Damage")
+	local rangeValue = config:FindFirstChild("AttackRange")
+
+	if not damageValue or not rangeValue then return end
+
+	local damage = damageValue.Value
+	local range = rangeValue.Value
+
+	-- validate player
+	local char = target
+	local hrp = char and char:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+
+	-- anti-hack: check range từ CONFIG
+	if (hrp.Position - monster.PrimaryPart.Position).Magnitude > range then
+		return
+	end
+
+	-- SERVER quyết định damage
+	print("Damaging monster ", monster.Name, " for ", damage)
 	if hum then
-		hum:TakeDamage(DAMAGE)
+		hum:TakeDamage(damage)
 	end
 end
 
