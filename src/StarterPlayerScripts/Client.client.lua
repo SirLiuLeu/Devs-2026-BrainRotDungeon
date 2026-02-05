@@ -1,35 +1,91 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
 local WeaponClient = require(game.ReplicatedStorage.Modules.WeaponClient)
 local WeaponController = require(game.ReplicatedStorage.Modules.WeaponController)
 local WeaponInput = require(game.ReplicatedStorage.Modules.WeaponInput)
 local WeaponConfig = require(game.ReplicatedStorage.Modules.WeaponConfig)
 
-local Tool
-local player = game.Players.LocalPlayer
-local backpack = player:WaitForChild("Backpack")
+local weaponByTool = {}
+local currentWeapon
+local toolConnections = {}
+local containerConnections = {}
 
-for _, tool in ipairs(backpack:GetChildren()) do
-	if tool:IsA("Tool") then
-		print(tool.Name)
-        Tool = tool
+local function ensureWeapon(tool)
+	if not weaponByTool[tool] then
+		weaponByTool[tool] = WeaponClient.new(tool)
+	end
+
+	return weaponByTool[tool]
+end
+
+local function onToolEquipped(tool)
+	if not tool:IsA("Tool") then return end
+	if not tool:FindFirstChild("WeaponTag") then return end
+    
+	local weapon = ensureWeapon(tool)
+	currentWeapon = weapon
+	WeaponController.Equip(tool, weapon)
+end
+
+local function onToolUnequipped(tool)
+	if currentWeapon and weaponByTool[tool] == currentWeapon then
+		WeaponController.Unequip()
+		currentWeapon = nil
 	end
 end
 
-
-local weapon = WeaponClient.new(Tool)
-
-Tool.Equipped:Connect(function()
-	WeaponController.Equip(Tool, weapon)
-	print("Equipped")
-	WeaponInput.Bind(function(skill)
-		weapon:PlayAttack(skill, WeaponConfig[skill].AnimationId, WeaponConfig[skill].Trail, WeaponConfig[skill].Cooldown)
-	end)
-end)
-
-Tool.Unequipped:Connect(function()
-	WeaponController.Unequip()
-end)
-
-Tool.Activated:Connect(function()
+local function onToolActivated(tool)
+	if not weaponByTool[tool] then return end
 	local skill = "Basic"
-	weapon:PlayAttack(skill, WeaponConfig[skill].AnimationId, WeaponConfig[skill].Trail, WeaponConfig[skill].Cooldown)
+	local cfg = WeaponConfig[skill]
+	weaponByTool[tool]:PlayAttack(skill, cfg.AnimationId, cfg.Trail, cfg.Cooldown)
+end
+
+local function bindInput()
+	WeaponInput.Bind(function(skill)
+		if not currentWeapon then return end
+		local cfg = WeaponConfig[skill]
+		currentWeapon:PlayAttack(skill, cfg.AnimationId, cfg.Trail, cfg.Cooldown)
+	end)
+end
+
+local function connectTool(tool)
+	if toolConnections[tool] then return end
+	if not tool:IsA("Tool") then return end
+    print("WeaponRuntime loaded for ", player.Name)
+	if not tool:FindFirstChild("WeaponTag") then return end
+    
+	toolConnections[tool] = true
+	tool.Equipped:Connect(function()
+		onToolEquipped(tool)
+	end)
+	tool.Unequipped:Connect(function()
+		onToolUnequipped(tool)
+	end)
+	tool.Activated:Connect(function()
+		onToolActivated(tool)
+	end)
+end
+
+local function connectContainer(container)
+	if containerConnections[container] then return end
+	containerConnections[container] = true
+	for _, child in ipairs(container:GetChildren()) do
+		connectTool(child)
+	end
+	container.ChildAdded:Connect(connectTool)
+end
+
+bindInput()
+
+if player.Backpack then
+	connectContainer(player.Backpack)
+end
+
+player.CharacterAdded:Connect(function(character)
+	connectContainer(character)
+	if player.Backpack then
+		connectContainer(player.Backpack)
+	end
 end)
