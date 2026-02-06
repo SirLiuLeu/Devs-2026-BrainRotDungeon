@@ -181,7 +181,6 @@ local function setupMonster(monster)
 		end
 
 		local damage = damageValue.Value
-		print("Damaging monster ", monster.Name, " for ", damage)
 		hum:TakeDamage(damage)
 	end
 
