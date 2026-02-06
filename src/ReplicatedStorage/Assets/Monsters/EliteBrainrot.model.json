@@ -1,0 +1,88 @@
+{
+  "name": "EliteBrainrot",
+  "className": "Model",
+  "properties": {
+    "Name": "EliteBrainrot"
+  },
+  "children": [
+    {
+      "name": "HumanoidRootPart",
+      "className": "Part",
+      "properties": {
+        "Name": "HumanoidRootPart",
+        "Anchored": true,
+        "Size": [2, 2, 1]
+      },
+      "children": [
+        {
+          "name": "Hitbox",
+          "className": "Attachment"
+        },
+        {
+          "name": "DamagePoint",
+          "className": "Attachment"
+        }
+      ]
+    },
+    {
+      "name": "Humanoid",
+      "className": "Humanoid",
+      "properties": {
+        "Name": "Humanoid"
+      },
+      "children": [
+        {
+          "name": "Animator",
+          "className": "Animator",
+          "properties": {
+            "Name": "Animator"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Config",
+      "className": "Folder",
+      "properties": {
+        "Name": "Config"
+      },
+      "children": [
+        {
+          "name": "Damage",
+          "className": "NumberValue",
+          "properties": {
+            "Value": 15
+          }
+        },
+        {
+          "name": "HP",
+          "className": "NumberValue",
+          "properties": {
+            "Value": 200
+          }
+        },
+        {
+          "name": "AttackRange",
+          "className": "NumberValue",
+          "properties": {
+            "Value": 6
+          }
+        },
+        {
+          "name": "Cooldown",
+          "className": "NumberValue",
+          "properties": {
+            "Value": 1.2
+          }
+        },
+        {
+          "name": "RoomId",
+          "className": "IntValue",
+          "properties": {
+            "Value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

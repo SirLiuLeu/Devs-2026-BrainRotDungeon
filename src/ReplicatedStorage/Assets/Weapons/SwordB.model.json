@@ -1,0 +1,60 @@
+{
+  "name": "SwordB",
+  "className": "Tool",
+  "properties": {
+    "Name": "SwordB"
+  },
+  "children": [
+    {
+      "name": "Handle",
+      "className": "Part",
+      "properties": {
+        "Name": "Handle",
+        "Size": [1, 5, 1]
+      },
+      "children": [
+        {
+          "name": "Hitbox",
+          "className": "Attachment"
+        }
+      ]
+    },
+    {
+      "name": "WeaponConfig",
+      "className": "Folder",
+      "properties": {
+        "Name": "WeaponConfig"
+      },
+      "children": [
+        {
+          "name": "Damage",
+          "className": "NumberValue",
+          "properties": {
+            "Value": 15
+          }
+        },
+        {
+          "name": "AttackSpeed",
+          "className": "NumberValue",
+          "properties": {
+            "Value": 0.7
+          }
+        },
+        {
+          "name": "Range",
+          "className": "NumberValue",
+          "properties": {
+            "Value": 7
+          }
+        },
+        {
+          "name": "Knockback",
+          "className": "NumberValue",
+          "properties": {
+            "Value": 8
+          }
+        }
+      ]
+    }
+  ]
+}

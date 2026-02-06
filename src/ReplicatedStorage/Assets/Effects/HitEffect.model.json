@@ -1,0 +1,30 @@
+{
+  "name": "HitEffect",
+  "className": "Model",
+  "properties": {
+    "Name": "HitEffect"
+  },
+  "children": [
+    {
+      "name": "EmitterPart",
+      "className": "Part",
+      "properties": {
+        "Name": "EmitterPart",
+        "Anchored": true,
+        "Size": [1, 1, 1]
+      },
+      "children": [
+        {
+          "name": "EffectAttachment",
+          "className": "Attachment",
+          "children": [
+            {
+              "name": "ParticleEmitter",
+              "className": "ParticleEmitter"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

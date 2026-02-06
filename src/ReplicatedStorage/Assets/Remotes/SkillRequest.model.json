@@ -1,0 +1,7 @@
+{
+  "name": "SkillRequest",
+  "className": "RemoteEvent",
+  "properties": {
+    "Name": "SkillRequest"
+  }
+}

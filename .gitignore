@@ -8,6 +8,7 @@ sourcemap.json
 # Roblox Studio temp
 *.lock
 *.meta.json
+!src/ReplicatedStorage/Assets/**/*.meta.json
 
 # Packages
 node_modules

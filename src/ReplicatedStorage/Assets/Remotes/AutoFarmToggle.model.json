@@ -1,0 +1,7 @@
+{
+  "name": "AutoFarmToggle",
+  "className": "RemoteEvent",
+  "properties": {
+    "Name": "AutoFarmToggle"
+  }
+}
