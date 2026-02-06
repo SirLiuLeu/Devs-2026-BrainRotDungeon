@@ -67,7 +67,7 @@ local function setupMonster(monster)
 
 	local humanoid = monster:FindFirstChild("Humanoid")
 	local animator = humanoid and humanoid:FindFirstChild("Animator")
-	local animations = monster:FindFirstChild("Animations")
+	local animations = game:GetService("ReplicatedStorage").Assets.Animations.Monster:FindFirstChild(monster.Name)
 	if not humanoid or not animator or not animations then
 		return
 	end
