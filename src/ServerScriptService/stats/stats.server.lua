@@ -1,4 +1,8 @@
 local DataStore = game:GetService("DataStoreService")
+local ServerScriptService = game:GetService("ServerScriptService")
+
+local PlayerConfig = require(ServerScriptService.Data.PlayerConfig)
+local WeaponConfig = require(ServerScriptService.Data.WeaponConfig)
 local Level1 = DataStore:GetDataStore("Levels001")
 local Beli11 = DataStore:GetDataStore("Beli001")
 local Exp1 = DataStore:GetDataStore("Exp001")
@@ -14,22 +18,30 @@ local Special1 = DataStore:GetDataStore("Special001")
 local Points1 = DataStore:GetDataStore("Points001")
 
 game.Players.PlayerAdded:Connect(function(Plr)
+	local defaultConfig = PlayerConfig.Default
+	local baseStats = defaultConfig.BaseStats
+	local progression = defaultConfig.Progression
+	local currency = defaultConfig.Currency
+	local startingWeapon = defaultConfig.StartingWeapon
+	local startingWeaponConfig = WeaponConfig[startingWeapon]
+	local startingWeaponDamage = startingWeaponConfig and startingWeaponConfig.BaseDamage or 0
+
 	local stats = Instance.new("Folder", Plr)
 	stats.Name = "Data"
 	--- Level System
 	local Levels = Instance.new("IntValue", stats)
 	Levels.Name = "Levels"
-	Levels.Value = 1
+	Levels.Value = progression.Level
 	local Exp = Instance.new("IntValue", stats)
 	Exp.Name = "Exp"
-	Exp.Value = 0
+	Exp.Value = progression.Exp
 	local ExpNeed = Instance.new("IntValue", stats)
 	ExpNeed.Name = "ExpNeed"
-	ExpNeed.Value = 200
+	ExpNeed.Value = progression.ExpNeed
 	--- Money System
 	local Beli = Instance.new("IntValue", stats)
 	Beli.Name = "Gold"
-	Beli.Value = 0
+	Beli.Value = currency.Gold
 	--- Stats Text
 	local DefenseP = Instance.new("IntValue", stats)
 	DefenseP.Name = "DefenseP"
@@ -46,7 +58,7 @@ game.Players.PlayerAdded:Connect(function(Plr)
 	--- Stats System
 	local Points = Instance.new("IntValue", stats)
 	Points.Name = "Points"
-	Points.Value = 0
+	Points.Value = progression.StatPoints
 	local PointsS = Instance.new("IntValue", stats)
 	PointsS.Name = "PointsS"
 	PointsS.Value = 1
@@ -62,6 +74,18 @@ game.Players.PlayerAdded:Connect(function(Plr)
 	local Special = Instance.new("IntValue", stats)
 	Special.Name = "Special"
 	Special.Value = 0
+
+	local BaseDamage = Instance.new("IntValue", stats)
+	BaseDamage.Name = "BaseDamage"
+	BaseDamage.Value = baseStats.BaseDamage
+
+	local EquippedWeapon = Instance.new("StringValue", stats)
+	EquippedWeapon.Name = "EquippedWeapon"
+	EquippedWeapon.Value = startingWeapon
+
+	local WeaponDamage = Instance.new("IntValue", stats)
+	WeaponDamage.Name = "WeaponDamage"
+	WeaponDamage.Value = startingWeaponDamage
 ---- Datastore ----
 --- Levels
    Levels.Value = Level1:GetAsync(Plr.UserId) or Levels.Value
@@ -100,22 +124,22 @@ game.Players.PlayerAdded:Connect(function(Plr)
 	   DefenseP1:SetAsync(Plr.UserId, DefenseP.Value)
    end)
 --- LuckP
-   ExpNeed.Value = ExpNeed1:GetAsync(Plr.UserId) or ExpNeed.Value
-	   ExpNeed1:SetAsync(Plr.UserId, ExpNeed.Value)
-      ExpNeed.Changed:connect(function()
-	   ExpNeed1:SetAsync(Plr.UserId, ExpNeed.Value)
+   LuckP.Value = LuckP1:GetAsync(Plr.UserId) or LuckP.Value
+	   LuckP1:SetAsync(Plr.UserId, LuckP.Value)
+      LuckP.Changed:connect(function()
+	   LuckP1:SetAsync(Plr.UserId, LuckP.Value)
    end)
 --- SpecialP
-   ExpNeed.Value = ExpNeed1:GetAsync(Plr.UserId) or ExpNeed.Value
-	   ExpNeed1:SetAsync(Plr.UserId, ExpNeed.Value)
-      ExpNeed.Changed:connect(function()
-	   ExpNeed1:SetAsync(Plr.UserId, ExpNeed.Value)
+   SpecialP.Value = SpecialP1:GetAsync(Plr.UserId) or SpecialP.Value
+	   SpecialP1:SetAsync(Plr.UserId, SpecialP.Value)
+      SpecialP.Changed:connect(function()
+	   SpecialP1:SetAsync(Plr.UserId, SpecialP.Value)
    end)
 --- Sword
    Sword.Value = Sword1:GetAsync(Plr.UserId) or Sword.Value
-	   Sword1:SetAsync(Plr.UserId, SwordP.Value)
+	   Sword1:SetAsync(Plr.UserId, Sword.Value)
       Sword.Changed:connect(function()
-	   Sword1:SetAsync(Plr.UserId, SwordP.Value)
+	   Sword1:SetAsync(Plr.UserId, Sword.Value)
    end)
 --- Defense
    Defense.Value = Defense1:GetAsync(Plr.UserId) or Defense.Value
@@ -163,7 +187,7 @@ end)
 
 game.Players.PlayerRemoving:connect(function(Player)
 	Level1:SetAsync(Player.UserId, Player.Data.Levels.Value)
-	Beli11:SetAsync(Player.UserId, Player.Data.Beli.Value)
+	Beli11:SetAsync(Player.UserId, Player.Data.Gold.Value)
 	Exp1:SetAsync(Player.UserId, Player.Data.Exp.Value)
 	ExpNeed1:SetAsync(Player.UserId, Player.Data.ExpNeed.Value)
 	SwordP1:SetAsync(Player.UserId, Player.Data.SwordP.Value)

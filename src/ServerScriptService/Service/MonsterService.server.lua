@@ -1,5 +1,8 @@
 local Players = game:GetService("Players")
+local ServerScriptService = game:GetService("ServerScriptService")
 local Enemies = workspace:WaitForChild("Enemies")
+
+local MonsterConfig = require(ServerScriptService.Data.MonsterConfig)
 
 local ATTACK_COOLDOWN = 1
 
@@ -21,6 +24,42 @@ local function getNearestPlayer(monster, range)
 	return nearest, minDist
 end
 
+local function getMonsterConfig(monster)
+	return MonsterConfig[monster.Name] or MonsterConfig.Default
+end
+
+local function applyMonsterConfig(monster, configData)
+	local config = monster:FindFirstChild("Config")
+	if not config then
+		config = Instance.new("Folder")
+		config.Name = "Config"
+		config.Parent = monster
+	end
+
+	local function setConfigValue(name, value)
+		local valueObject = config:FindFirstChild(name)
+		if not valueObject then
+			valueObject = Instance.new("NumberValue")
+			valueObject.Name = name
+			valueObject.Parent = config
+		end
+		valueObject.Value = value
+		return valueObject
+	end
+
+	local attackRangeValue = setConfigValue("AttackRange", configData.AttackRange or 5)
+	local aggroRangeValue = setConfigValue("AggroRange", configData.AggroRange or 25)
+	local damageValue = setConfigValue("Damage", configData.Damage or 10)
+
+	local humanoid = monster:FindFirstChild("Humanoid")
+	if humanoid and configData.MaxHP then
+		humanoid.MaxHealth = configData.MaxHP
+		humanoid.Health = humanoid.MaxHealth
+	end
+
+	return config, attackRangeValue, aggroRangeValue, damageValue
+end
+
 local function setupMonster(monster)
 	if not monster:IsA("Model") then
 		return
@@ -29,8 +68,7 @@ local function setupMonster(monster)
 	local humanoid = monster:FindFirstChild("Humanoid")
 	local animator = humanoid and humanoid:FindFirstChild("Animator")
 	local animations = monster:FindFirstChild("Animations")
-	local config = monster:FindFirstChild("Config")
-	if not humanoid or not animator or not animations or not config then
+	if not humanoid or not animator or not animations then
 		return
 	end
 
@@ -40,10 +78,9 @@ local function setupMonster(monster)
 	end
 	monster.PrimaryPart = primaryPart
 
-	local attackRangeValue = config:FindFirstChild("AttackRange")
-	local aggroRangeValue = config:FindFirstChild("AggroRange")
-	local damageValue = config:FindFirstChild("Damage")
-	if not attackRangeValue or not aggroRangeValue or not damageValue then
+	local configData = getMonsterConfig(monster)
+	local config, attackRangeValue, aggroRangeValue, damageValue = applyMonsterConfig(monster, configData)
+	if not config or not attackRangeValue or not aggroRangeValue or not damageValue then
 		return
 	end
 
@@ -55,6 +92,30 @@ local function setupMonster(monster)
 	runTrack.Priority = Enum.AnimationPriority.Movement
 
 	local attackTrack = animator:LoadAnimation(animations.Attack)
+	local rewardConfig = configData.Rewards or {}
+
+	humanoid.Died:Connect(function()
+		local lastHitId = monster:GetAttribute("LastHitPlayerId")
+		if not lastHitId then
+			return
+		end
+		local player = Players:GetPlayerByUserId(lastHitId)
+		if not player then
+			return
+		end
+		local data = player:FindFirstChild("Data")
+		if not data then
+			return
+		end
+		local expValue = data:FindFirstChild("Exp")
+		local goldValue = data:FindFirstChild("Gold")
+		if expValue then
+			expValue.Value += rewardConfig.Exp or 0
+		end
+		if goldValue then
+			goldValue.Value += rewardConfig.Gold or 0
+		end
+	end)
 
 	local function stopRun()
 		if runTrack.IsPlaying then
