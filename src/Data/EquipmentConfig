@@ -1,4 +1,4 @@
-EquipmentConfig = {
+local EquipmentConfig = {
 
 --================ WEAPONS ================--
 
@@ -9,15 +9,69 @@ EquipmentConfig = {
         LevelReq = 1,
 
         BaseStats = {
-            Damage = 10
+            Damage = 10,
         },
 
         Growth = {
-            Damage = 1.12
+            Damage = 1.12,
         },
 
         AttackProfile = "Melee_Single",
-        Tags = { "Melee" }
+        Tags = { "Melee" },
+    },
+
+    Sword_Common = {
+        Slot = "Weapon",
+        SubType = "Sword",
+        Rarity = "Common",
+        LevelReq = 3,
+
+        BaseStats = {
+            Damage = 12,
+        },
+
+        Growth = {
+            Damage = 1.13,
+        },
+
+        AttackProfile = "Melee_Single",
+        Tags = { "Melee" },
+    },
+
+    Sword_Uncommon = {
+        Slot = "Weapon",
+        SubType = "Sword",
+        Rarity = "Uncommon",
+        LevelReq = 7,
+
+        BaseStats = {
+            Damage = 16,
+        },
+
+        Growth = {
+            Damage = 1.14,
+        },
+
+        AttackProfile = "Melee_Single",
+        Tags = { "Melee" },
+    },
+
+    Sword_Rare = {
+        Slot = "Weapon",
+        SubType = "Sword",
+        Rarity = "Rare",
+        LevelReq = 12,
+
+        BaseStats = {
+            Damage = 22,
+        },
+
+        Growth = {
+            Damage = 1.16,
+        },
+
+        AttackProfile = "Melee_Single",
+        Tags = { "Melee" },
     },
 
     Bow_Wood = {
@@ -28,52 +82,87 @@ EquipmentConfig = {
 
         BaseStats = {
             Damage = 8,
-            AttackRange = 40
+            AttackRange = 40,
         },
 
         Growth = {
-            Damage = 1.10
+            Damage = 1.10,
         },
 
         AttackProfile = "Projectile_Single",
-        Tags = { "Ranged" }
+        Tags = { "Ranged" },
     },
 
-    Staff_Apprentice = {
+    Staff_Epic = {
         Slot = "Weapon",
         SubType = "Staff",
-        Rarity = "Rare",
-        LevelReq = 10,
+        Rarity = "Epic",
+        LevelReq = 20,
 
         BaseStats = {
-            Damage = 12,
-            Mana = 20
+            Damage = 30,
+            Mana = 30,
         },
 
         Growth = {
-            Damage = 1.15
+            Damage = 1.18,
         },
 
         AttackProfile = "Magic_AOE",
-        Tags = { "Magic" }
+        Tags = { "Magic" },
+    },
+
+    DragonBlade = {
+        Slot = "Weapon",
+        SubType = "Sword",
+        Rarity = "Legendary",
+        LevelReq = 30,
+
+        BaseStats = {
+            Damage = 45,
+            LifestealPercent = 0.01,
+        },
+
+        Growth = {
+            Damage = 1.2,
+        },
+
+        AttackProfile = "Melee_Single",
+        Tags = { "Melee", "Boss" },
     },
 
 --================ ARMOR ================--
 
-    Helmet_Iron = {
+    Helmet_Common = {
         Slot = "Armor",
         SubType = "Helmet",
         Rarity = "Common",
-        LevelReq = 5,
+        LevelReq = 4,
 
         BaseStats = {
-            HP = 50,
-            Defense = 4
+            HP = 40,
+            Defense = 3,
         },
 
         Growth = {
-            HP = 1.18
-        }
+            HP = 1.16,
+        },
+    },
+
+    Armor_Rare = {
+        Slot = "Armor",
+        SubType = "Chest",
+        Rarity = "Rare",
+        LevelReq = 14,
+
+        BaseStats = {
+            HP = 120,
+            Defense = 8,
+        },
+
+        Growth = {
+            HP = 1.2,
+        },
     },
 
 --================ ACCESSORY ================--
@@ -85,7 +174,9 @@ EquipmentConfig = {
         LevelReq = 8,
 
         BaseStats = {
-            Luck = 0.05
-        }
-    }
+            Luck = 0.05,
+        },
+    },
 }
+
+return EquipmentConfig

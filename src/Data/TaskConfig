@@ -1,5 +1,4 @@
-TaskConfig = {
-
+local TaskConfig = {
     KillMonster_10 = {
         Type = "Daily",
         Category = "Combat",
@@ -7,17 +6,17 @@ TaskConfig = {
         Objective = {
             Event = "KillMonster",
             Target = "Any",
-            Count = 10
+            Count = 10,
         },
 
         Rewards = {
             Gold = 500,
             Exp = 200,
             Bone = 5,
-            Item = "Potion_Small"
+            Item = "Potion_HP_Small",
         },
 
-        Reset = "Daily"
+        Reset = "Daily",
     },
 
     KillBoss_1 = {
@@ -26,16 +25,16 @@ TaskConfig = {
 
         Objective = {
             Event = "KillBoss",
-            Count = 1
+            Count = 1,
         },
 
         Rewards = {
             Gold = 1000,
             Exp = 500,
-            Item = "Armor_Rare"
+            Item = "Armor_Rare",
         },
 
-        Reset = "Daily"
+        Reset = "Daily",
     },
 
     DealDamage_100k = {
@@ -44,16 +43,16 @@ TaskConfig = {
 
         Objective = {
             Event = "DealDamage",
-            Count = 100000
+            Count = 100000,
         },
 
         Rewards = {
             Gold = 2000,
             Exp = 1000,
-            Item = "Sword_Uncommon"
+            Item = "Sword_Uncommon",
         },
 
-        Reset = "Weekly"
+        Reset = "Weekly",
     },
 
     Story_Chapter1 = {
@@ -62,37 +61,41 @@ TaskConfig = {
 
         Objective = {
             Event = "EnterRoom",
-            Room = 104
+            Room = 104,
         },
 
         Rewards = {
             Gold = 1000,
             Exp = 500,
-            Bone = 10
-        }
-,
+            Bone = 10,
+        },
 
-        Reset = "Never"
-    }
+        Reset = "Never",
+    },
 }
-PlayerTasks = {
 
+local PlayerTasks = {
     Progress = {
         KillMonster_10 = 4,
         KillBoss_1 = 0,
         DealDamage_100k = 52000,
-        Story_Chapter1 = 1
+        Story_Chapter1 = 1,
     },
 
     Claimed = {
         KillMonster_10 = false,
         KillBoss_1 = false,
         DealDamage_100k = false,
-        Story_Chapter1 = true
+        Story_Chapter1 = true,
     },
 
     ResetTime = {
         Daily = 1707206400,
-        Weekly = 1707260000
-    }
+        Weekly = 1707260000,
+    },
+}
+
+return {
+    TaskConfig = TaskConfig,
+    PlayerTasks = PlayerTasks,
 }

@@ -1,35 +1,46 @@
 -- No save data, runtime only
-PlayerState = {
 
+local PlayerState = {
     FinalStats = {
-        MaxHP = number,
-        Damage = number,
-        Defense = number,
-        MoveSpeed = number,
+        MaxHP = "number",
+        Damage = "number",
+        Defense = "number",
+        MoveSpeed = "number",
     },
 
     Multipliers = {
-        Exp = number,
-        Gold = number,
-        Bone = number,
-        Luck = number,
+        Exp = "number",
+        Gold = "number",
+        Bone = "number",
+        Luck = "number",
     },
 
     Cooldowns = {
-        Attack = number,
-        Skills = { [SkillId] = timestamp }
+        Attack = "number",
+        Skills = { ["SkillId"] = "timestamp" },
     },
 
     Combat = {
-        Target = EnemyId?,
-        InCombat = boolean,
-    }
+        Target = "EnemyId?",
+        InCombat = "boolean",
+        LastAttackTime = "number",
+    },
+
+    AutoFarm = {
+        Enabled = "boolean",
+        CurrentTarget = "EnemyId?",
+    },
 }
 
-BossFight = {
-    BossId = string,
+local BossFight = {
+    BossId = "string",
     DamageByPlayer = {
-        [UserId] = number
+        ["UserId"] = "number",
     },
-    LastHit = UserId
+    LastHit = "UserId",
+}
+
+return {
+    PlayerState = PlayerState,
+    BossFight = BossFight,
 }

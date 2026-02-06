@@ -3,7 +3,6 @@
 local LevelExp = {}
 
 local MAX_LEVEL = 100
-
 local total = 0
 
 for level = 1, MAX_LEVEL do
@@ -12,60 +11,39 @@ for level = 1, MAX_LEVEL do
     LevelExp[level] = {
         Level = level,
         ExpToNext = expToNext,
-        TotalExp = total
+        TotalExp = total,
     }
 
     total += expToNext
-end
-
-local function AddExp(player, amount)
-    local profile = Profiles[player]
-
-    profile.Progression.Exp += amount
-
-    while profile.Progression.Level < 100 do
-        local need = LevelExp[profile.Progression.Level].ExpToNext
-
-        if profile.Progression.Exp < need then
-            break
-        end
-
-        profile.Progression.Exp -= need
-        profile.Progression.Level += 1
-        profile.Progression.StatPoints += 10
-    end
 end
 
 -- ReplicatedStorage/Config/WeaponUpgradeCost.lua
 
 local UpgradeCost = {}
 
-local MAX_LEVEL = 20
+local MAX_UPGRADE_LEVEL = 20
 local BASE_COST = 120
 
-for level = 1, MAX_LEVEL do
+for level = 1, MAX_UPGRADE_LEVEL do
     local cost = math.floor(BASE_COST * (level ^ 2.2) + level * 150)
 
     UpgradeCost[level] = {
         Level = level,
-        Gold = cost
+        Gold = cost,
     }
 end
 
-local function GetUpgradeCost(itemLevel)
-    return CostTable[itemLevel].Gold
-end
-
-local PowerScore =
-    Level * 5
-    + TotalEquipmentLevel * 20
-    + Rebirth * 150
-    + TotalStats * 2
-    + TotalPetsLevel * 3
-    + TotalSkillsLearned * 10
+local PowerScoreWeights = {
+    Level = 5,
+    TotalEquipmentLevel = 20,
+    Rebirth = 150,
+    TotalStats = 2,
+    TotalPetsLevel = 3,
+    TotalSkillsLearned = 10,
+}
 
 return {
-    AddExp = AddExp,
-    GetUpgradeCost = GetUpgradeCost,
-    PowerScore = PowerScore
+    LevelExp = LevelExp,
+    UpgradeCost = UpgradeCost,
+    PowerScoreWeights = PowerScoreWeights,
 }

@@ -1,5 +1,4 @@
-GachaConfig = {
-
+local GachaConfig = {
     Standard = {
         Currency = "Bone",
         Cost = 100,
@@ -7,52 +6,49 @@ GachaConfig = {
         Rolls = 1, -- quay 1 lần (multi roll xử lý ở server)
 
         Pools = {
-            Common = 0.75,
-            Rare = 0.20,
-            Epic = 0.045,
-            Legendary = 0.005
+            Common = 0.7,
+            Uncommon = 0.2,
+            Rare = 0.08,
+            Epic = 0.018,
+            Legendary = 0.002,
         },
 
         Pity = {
             Enabled = true,
             Counter = "Legendary", -- pity cho rarity nào
             Soft = {
-                Start = 50,        -- bắt đầu tăng tỉ lệ
-                BonusPerRoll = 0.002
+                Start = 50, -- bắt đầu tăng tỉ lệ
+                BonusPerRoll = 0.002,
             },
-            Hard = 80              -- chắc chắn ra Legendary
+            Hard = 80, -- chắc chắn ra Legendary
         },
 
         Items = {
             Common = {
-                "Sword_Common",
-                "Helmet_Common",
-                "PotionHP"
+                { Id = "Sword_Common", Type = "Equipment" },
+                { Id = "Helmet_Common", Type = "Equipment" },
+                { Id = "Potion_HP_Small", Type = "Consumable" },
+            },
+
+            Uncommon = {
+                { Id = "Sword_Uncommon", Type = "Equipment" },
+                { Id = "Potion_HP_Medium", Type = "Consumable" },
             },
 
             Rare = {
-                "Sword_Rare",
-                "Armor_Rare"
+                { Id = "Sword_Rare", Type = "Equipment" },
+                { Id = "Armor_Rare", Type = "Equipment" },
             },
 
             Epic = {
-                "Staff_Epic"
+                { Id = "Staff_Epic", Type = "Equipment" },
             },
 
             Legendary = {
-                "DragonBlade"
-            }
-        }
-    }
-}
--- no save data, runtime only
-RollResult = {
-    Banner = "Standard",
-    Cost = 100,
-    Results = {
-        { Item = "Sword_Common", Rarity="Common" }
+                { Id = "DragonBlade", Type = "Equipment" },
+            },
+        },
     },
-    NewPity = {
-        Legendary = 38
-    }
 }
+
+return GachaConfig
