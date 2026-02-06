@@ -1,0 +1,275 @@
+BRAINROT DUNGEON — CODEX BUILD SPEC
+1. Core Loop
+Player enters dungeon
+ → kill Brainrot
+   → gain Exp + Gold (+ chance Bone)
+     → upgrade gear / pet / stats
+       → fight Elite
+         → fight Boss
+           → rebirth to scale progression
+
+Auto Farm chỉ là hành động thay thế attack của player.
+
+2. Auto Farm System
+Goal: Player tự tìm và đánh quái gần nhất của phòng đó
+Behavior:
+When AutoFarm = ON:
+    find nearest enemy within detection range
+    move toward enemy
+    attack using normal attack cooldown
+
+Restrictions:
+    chỉ dùng basic attack
+    không dùng skill
+    vẫn nhận drop như bình thường
+
+3. Enemy Types
+- Player chỉ nhận được exp, gold, khi đánh quái trong vòng +- 10level so với level hiện tại của player
+- Bone thì vẫn có thể rớt từ quái cao hơn level player
+3.1 Brainrot (Normal)
+Config:
+    Damage
+    RangeAttack
+    HP
+    Cooldown (default = 1s)
+    AttackType = SingleTarget
+Drop:
+    Exp
+    Gold
+    Low chance Bone
+3.2 Elite Brainrot
+Spawn random
+Drop:
+    Exp
+    Gold
+    Bone
+    HP Item
+    + chance drop items (common -> Rare)
+3.3 Boss Brainrot
+Abilities: AOE damage skill
+Reward rule:
+    LastHitPlayer → 30% Bone
+    Remaining Bone → distributed by damage contribution
+    All → Exp + Gold + buff item + items (UnCommon -> Epic)
+        -> drop thẻ reset 1 dòng stats pet, sword ( chance thấp)
+4. Player Progression
+Level
+Gain Exp → Level Up
+Each level → +10 stat points
+Level requirement unlock higher weapons
+
+Stats allocation
+    Strength → increase Damage
+    Agility → increase Armor
+    Vitality → increase HP
+Player can distribute points into own attributes (no limit specified).
+
+5. Equipment System
+Equipment Types:
+    Weapon (sword)
+    Armor (quần, áo)
+    Accessory (ring, necklace)
+
+Rarity
+Tier	Random Stats Count
+Normal	1
+Unnormal	2
+Rare	3
+Epic	4
+Legendary	5 
+Mythic 5 + lifeste 1% damage
+Secret 5 + lifeste 1% damage + %10 lucky drop items from monster
+Possible random attributes:
+    +%Exp
+    +Damage
+    +%Attack Damage
+    +%Gold
+    +Armor
+    + Refect Armor
+    +HP
+    +Lifestea l%
+    +HP Regen
+    + Move Speed
+    + heal/s
+    + % lucky drop items from monster
+    + Critical chance %
+    + Critical damage %
+    + Attack Speed %
+    + Skill Damage %
+    + Gold cố định ( 10 gold cho 1 quái kill được)
+    + Bone cố định (1 bone cho 1 quái kill được)
+6. Pet System
+Player can summon mini Brainrot after defeating them.
+Pet effects:
+    Increase player damage (ex: x2, x3 damage)
+    Increase player HP  (ex: x1.5, x2 HP)
+    Pet level up using Bone to increase its effect.
+
+7. Rebirth System
+Reset level to currently level with exp = 0%
+    +5% Gold gain permanently
+
+8. Currency System
+Earn
+    Action	Reward
+    Kill Brainrot	Exp + Gold (+ chance Bone)
+    Kill Elite	Exp + Gold + Bone 
+    Kill Boss	Exp + Gold + Bone + HP, Lucky item, Items (unormal, race, epic)
+    Spend
+
+Gold:
+    Upgrade equipment
+    Buy HP, Exp,.. potions
+    Ghép các trang bị cùng cấp lên loại cao hơn ( 3 common -> 1 Uncommon)( vẫn giữ level của trang bị)
+
+Bone:
+    Buy equipment
+    Upgrade pet, Skill
+    Exchange to Gold
+
+9. Skill System
+
+    Player equips:
+    1 Active
+    1 Passive
+
+    Active Skills
+    Fixed damage
+    Fixed heal
+    Speed buff
+    Stun / Freeze (2s)
+    Lướt tới 1 đoạn dài ( để tiện cho việc di chuyển nhanh đến quái khác)
+
+    Passive Skills
+    Heal over time (1-3%/s)
+    Damage increase (10-20%)
+    HP increase (20-40%)
+
+    Upgrade cost: Bone
+
+10. Shop & Monetization
+Premium Vip: Boost in 1 month
+    +25% Exp
+    +25% Gold
+    +25% Bone
+    + Bone = level * (1 + rebirth * 0.1)  * 100
+    + +1 Legendary items
+    + Pet lifesteal ability
+
+Paid items:
+    Exp boost
+    Gold boost
+    Move speed boost
+    HP potions + 30% HP
+    Damage potions + 30% Damage
+    Exp potions + 50% Exp
+    Gacha legendary equipment
+Gamge pass:
+ - sword có stat cố định
+ - pet có stat cố định
+ - mua 1 lần dùng mãi mãi
+ - thẻ reset 1 dòng stats pet, sword
+11. Ranking
+Leaderboard categories:
+    Level
+    Diamond farm
+    Power score
+        Power score formula based on:
+            Level
+            Equipment
+            Rebirth count
+12. Quests & Missions
+12.1 Task Daily, weekly
+ - mỗi nhiệm vụ
+ - hoàn thành sẽ nhận được điểm tiến độ
+ - có phần thưởng ở mỗi mốc, hoàn thành được 1 epic Item
+12.2 có 2 loại nhiệm vụ phụ tuyến nhận từ NPC ( 2nv/ngày)
+	+ 15p nhận bone + Uncommon trang bị
+	+ 1h nhận bone + Rare trang bị
+12.3 Lưu ý về cơ chế Boss
+ - tạo ra yếu tố đoàn kết cho các player cùng tiêu diệt nó
+ - quái sẽ xuất hiện trong phòng ( 1 map có nhiều phòng), boss trong phòng (104, 204, 304...)
+ 	+ Map là 1 Maze quy mô nhỏ, có địa hình xu hướng đi sâu xuống
+
+ - Map contains Rooms
+ - Each Room contains:
+    SpawnPoints
+    ActiveEnemies
+    PlayersInside
+    Boss (optional)
+
+ - Player and Enemy can only interact if:
+    same RoomId
+
+--------------------
+Thêm phần 13 — GAME ENGINE RULES (QUAN TRỌNG NHẤT)
+
+13. Server Authority Rules
+Combat
+All damage is calculated on SERVER only.
+- Client responsibilities:
+    send attack intent
+    play animation
+    display effects
+- Server responsibilities:
+    validate cooldown
+    detect hit
+    apply damage
+    calculate drops
+    distribute rewards
+- Client never decides:
+    damage
+    drop
+    exp
+    gold
+    Movement
+
+Player movement → client controlled
+Monster movement → server controlled
+
+Auto Farm:
+Client responsibilities:
+    find nearest enemy
+    send move + attack intent
+Server calculates:
+    exp
+    gold
+    bone
+    item drop
+    Server sends result to client
+    Boss Damage Contribution
+
+Data Storage
+Server owns player data:
+    PlayerData:
+        Level
+        Exp
+        Gold
+        Bone
+        Stats
+        Equipment
+        Rebirth
+        Skills
+        Pet
+Client only receives a copy (readonly)
+Anti Exploit Rule
+If client sends attack faster than cooldown:
+    ignore request
+If client sends damage:
+    ignore
+If client sends drop:
+    ignore
+
+
+Build architecture MMORPG theo pattern chuẩn:
+
+Client
+    Input → RequestAction
+
+Server
+    Validate → Simulate → Result
+
+Client
+    Display Result
+
+--------

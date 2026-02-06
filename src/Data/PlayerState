@@ -1,0 +1,35 @@
+-- No save data, runtime only
+PlayerState = {
+
+    FinalStats = {
+        MaxHP = number,
+        Damage = number,
+        Defense = number,
+        MoveSpeed = number,
+    },
+
+    Multipliers = {
+        Exp = number,
+        Gold = number,
+        Bone = number,
+        Luck = number,
+    },
+
+    Cooldowns = {
+        Attack = number,
+        Skills = { [SkillId] = timestamp }
+    },
+
+    Combat = {
+        Target = EnemyId?,
+        InCombat = boolean,
+    }
+}
+
+BossFight = {
+    BossId = string,
+    DamageByPlayer = {
+        [UserId] = number
+    },
+    LastHit = UserId
+}

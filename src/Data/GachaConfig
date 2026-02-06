@@ -1,0 +1,58 @@
+GachaConfig = {
+
+    Standard = {
+        Currency = "Bone",
+        Cost = 100,
+
+        Rolls = 1, -- quay 1 lần (multi roll xử lý ở server)
+
+        Pools = {
+            Common = 0.75,
+            Rare = 0.20,
+            Epic = 0.045,
+            Legendary = 0.005
+        },
+
+        Pity = {
+            Enabled = true,
+            Counter = "Legendary", -- pity cho rarity nào
+            Soft = {
+                Start = 50,        -- bắt đầu tăng tỉ lệ
+                BonusPerRoll = 0.002
+            },
+            Hard = 80              -- chắc chắn ra Legendary
+        },
+
+        Items = {
+            Common = {
+                "Sword_Common",
+                "Helmet_Common",
+                "PotionHP"
+            },
+
+            Rare = {
+                "Sword_Rare",
+                "Armor_Rare"
+            },
+
+            Epic = {
+                "Staff_Epic"
+            },
+
+            Legendary = {
+                "DragonBlade"
+            }
+        }
+    }
+}
+-- no save data, runtime only
+RollResult = {
+    Banner = "Standard",
+    Cost = 100,
+    Results = {
+        { Item = "Sword_Common", Rarity="Common" }
+    },
+    NewPity = {
+        Legendary = 38
+    }
+}

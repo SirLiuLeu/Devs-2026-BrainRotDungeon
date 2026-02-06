@@ -1,0 +1,91 @@
+EquipmentConfig = {
+
+--================ WEAPONS ================--
+
+    Sword_Starter = {
+        Slot = "Weapon",
+        SubType = "Sword",
+        Rarity = "Common",
+        LevelReq = 1,
+
+        BaseStats = {
+            Damage = 10
+        },
+
+        Growth = {
+            Damage = 1.12
+        },
+
+        AttackProfile = "Melee_Single",
+        Tags = { "Melee" }
+    },
+
+    Bow_Wood = {
+        Slot = "Weapon",
+        SubType = "Bow",
+        Rarity = "Common",
+        LevelReq = 5,
+
+        BaseStats = {
+            Damage = 8,
+            AttackRange = 40
+        },
+
+        Growth = {
+            Damage = 1.10
+        },
+
+        AttackProfile = "Projectile_Single",
+        Tags = { "Ranged" }
+    },
+
+    Staff_Apprentice = {
+        Slot = "Weapon",
+        SubType = "Staff",
+        Rarity = "Rare",
+        LevelReq = 10,
+
+        BaseStats = {
+            Damage = 12,
+            Mana = 20
+        },
+
+        Growth = {
+            Damage = 1.15
+        },
+
+        AttackProfile = "Magic_AOE",
+        Tags = { "Magic" }
+    },
+
+--================ ARMOR ================--
+
+    Helmet_Iron = {
+        Slot = "Armor",
+        SubType = "Helmet",
+        Rarity = "Common",
+        LevelReq = 5,
+
+        BaseStats = {
+            HP = 50,
+            Defense = 4
+        },
+
+        Growth = {
+            HP = 1.18
+        }
+    },
+
+--================ ACCESSORY ================--
+
+    Ring_Luck = {
+        Slot = "Accessory",
+        SubType = "Ring",
+        Rarity = "Rare",
+        LevelReq = 8,
+
+        BaseStats = {
+            Luck = 0.05
+        }
+    }
+}
