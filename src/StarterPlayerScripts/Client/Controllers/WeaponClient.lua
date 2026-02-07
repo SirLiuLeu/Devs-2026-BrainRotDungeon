@@ -2,7 +2,7 @@ local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Remote = ReplicatedStorage.Remotes.UseSkill
+local Remote = ReplicatedStorage.Shared.Remotes.UseSkill
 
 
 local WeaponClient = {}

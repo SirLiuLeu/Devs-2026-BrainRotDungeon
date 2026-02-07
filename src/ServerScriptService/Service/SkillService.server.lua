@@ -1,6 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
-local Remote = ReplicatedStorage.Remotes.UseSkill
+local Remote = ReplicatedStorage.Shared.Remotes.UseSkill
 
 local SkillConfig = require(ServerScriptService.Data.SkillConfig)
 

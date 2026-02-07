@@ -1,10 +1,11 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
-local WeaponClient = require(game.ReplicatedStorage.Modules.WeaponClient)
-local WeaponController = require(game.ReplicatedStorage.Modules.WeaponController)
-local WeaponInput = require(game.ReplicatedStorage.Modules.WeaponInput)
-local WeaponConfig = require(game.ReplicatedStorage.Modules.WeaponConfig)
+local controllers = script.Parent:WaitForChild("Client"):WaitForChild("Controllers")
+local WeaponClient = require(controllers:WaitForChild("WeaponClient"))
+local WeaponController = require(controllers:WaitForChild("WeaponController"))
+local WeaponInput = require(controllers:WaitForChild("WeaponInput"))
+local WeaponConfig = require(game.ReplicatedStorage.Shared.Config.WeaponConfig)
 
 local weaponByTool = {}
 local currentWeapon
