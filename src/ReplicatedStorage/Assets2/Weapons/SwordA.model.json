@@ -1,5 +1,4 @@
 {
-  "name": "SwordA",
   "className": "Tool",
   "properties": {
     "Name": "SwordA"
@@ -10,7 +9,11 @@
       "className": "Part",
       "properties": {
         "Name": "Handle",
-        "Size": [1, 4, 1]
+        "Size": [
+          1,
+          4,
+          1
+        ]
       },
       "children": [
         {

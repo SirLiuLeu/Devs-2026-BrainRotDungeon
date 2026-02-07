@@ -1,5 +1,4 @@
 {
-  "name": "LevelUpEffect",
   "className": "Model",
   "properties": {
     "Name": "LevelUpEffect"
@@ -11,7 +10,11 @@
       "properties": {
         "Name": "EmitterPart",
         "Anchored": true,
-        "Size": [1, 1, 1]
+        "Size": [
+          1,
+          1,
+          1
+        ]
       },
       "children": [
         {

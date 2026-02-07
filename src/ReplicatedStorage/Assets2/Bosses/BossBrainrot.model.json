@@ -1,5 +1,4 @@
 {
-  "name": "BossBrainrot",
   "className": "Model",
   "properties": {
     "Name": "BossBrainrot"
@@ -11,7 +10,11 @@
       "properties": {
         "Name": "HumanoidRootPart",
         "Anchored": true,
-        "Size": [3, 3, 2]
+        "Size": [
+          3,
+          3,
+          2
+        ]
       },
       "children": [
         {

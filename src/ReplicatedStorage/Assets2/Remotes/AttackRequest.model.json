@@ -1,5 +1,4 @@
 {
-  "name": "AttackRequest",
   "className": "RemoteEvent",
   "properties": {
     "Name": "AttackRequest"

@@ -1,5 +1,4 @@
 {
-  "name": "HitEffect",
   "className": "Model",
   "properties": {
     "Name": "HitEffect"
@@ -11,7 +10,11 @@
       "properties": {
         "Name": "EmitterPart",
         "Anchored": true,
-        "Size": [1, 1, 1]
+        "Size": [
+          1,
+          1,
+          1
+        ]
       },
       "children": [
         {
