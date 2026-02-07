@@ -5,6 +5,7 @@ local Weapons = require(ReplicatedStorage.Shared.Config.Weapons)
 local Monsters = require(ReplicatedStorage.Shared.Config.Monsters)
 
 local PlayerStateService = require(script.Parent.PlayerStateService)
+local StatService = require(script.Parent.Parent.Systems.StatService)
 
 local CombatService = {}
 
@@ -105,9 +106,7 @@ function CombatService:ApplyDamage(attacker, target, weaponId)
             return false
         end
 
-        local baseDamage = weaponConfig.Damage or 0
-        local bonusDamage = state.Stats.Damage or 0
-        local damage = math.max(0, baseDamage + bonusDamage)
+        local damage = StatService:GetFinalDamage(attacker, weaponId)
 
         local targetPlayer = Players:GetPlayerFromCharacter(targetCharacter)
         if targetPlayer then

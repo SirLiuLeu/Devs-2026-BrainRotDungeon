@@ -3,13 +3,15 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local Remote = ReplicatedStorage.Shared.Remotes.UseSkill
 
 local CooldownService = require(ServerScriptService.Systems.CooldownService)
+local StatService = require(ServerScriptService.Systems.StatService)
 local SkillConfig = require(ReplicatedStorage.Shared.Config.Skills)
 
-local COOLDOWN_TIME = 1.5
 Remote.OnServerEvent:Connect(function(player, mode, skillName)
 	if mode ~= "Hit" then return end
-	if not CooldownService:IsReady(player, skillName) then return end
-	CooldownService:StartCooldown(player, skillName, COOLDOWN_TIME)
+	local skillId = skillName or "Basic"
+	local skill = SkillConfig[skillId] or SkillConfig.Basic
+	if not CooldownService:IsReady(player, skillId) then return end
+	CooldownService:StartCooldown(player, skillId, skill.Cooldown or 0)
 
 	local char = player.Character
 	if not char then return end
@@ -19,15 +21,10 @@ Remote.OnServerEvent:Connect(function(player, mode, skillName)
     
 	-- damage
 	if workspace:FindFirstChild("Enemies") then
-		local data = player:FindFirstChild("Data")
-		local baseDamageValue = data and data:FindFirstChild("BaseDamage")
-		local weaponDamageValue = data and data:FindFirstChild("WeaponDamage")
-		local baseDamage = baseDamageValue and baseDamageValue.Value or 0
-		local weaponDamage = weaponDamageValue and weaponDamageValue.Value or 0
-		local skill = SkillConfig[skillName] or SkillConfig.Basic
 		local damagePercent = skill and skill.DamagePercent or 1
 		local range = skill and skill.Range or 20
-		local damage = (baseDamage + weaponDamage) * damagePercent
+		local baseDamage = StatService:GetFinalDamage(player)
+		local damage = baseDamage * damagePercent
 
 		for _, enemy in pairs(workspace.Enemies:GetChildren()) do
 			local eh = enemy:FindFirstChildOfClass("Humanoid")
