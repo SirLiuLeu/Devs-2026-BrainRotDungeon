@@ -1,0 +1,78 @@
+{
+  "className": "Model",
+  "properties": {
+    "Name": "SlimeBrainrot"
+  },
+  "children": [
+    {
+      "className": "Part",
+      "properties": {
+        "Name": "HumanoidRootPart",
+        "Size": [2, 2, 2],
+        "Position": [0, 3, 0],
+        "Anchored": false,
+        "CanCollide": true
+      },
+      "children": [
+        {
+          "className": "Attachment",
+          "properties": {
+            "Name": "Hitbox"
+          }
+        }
+      ]
+    },
+    {
+      "className": "Humanoid",
+      "properties": {
+        "Name": "Humanoid",
+        "MaxHealth": 80,
+        "Health": 80
+      },
+      "children": [
+        {
+          "className": "Animator",
+          "properties": {
+            "Name": "Animator"
+          }
+        }
+      ]
+    },
+    {
+      "className": "Folder",
+      "properties": {
+        "Name": "Config"
+      },
+      "children": [
+        {
+          "className": "NumberValue",
+          "properties": {
+            "Name": "Damage",
+            "Value": 6
+          }
+        },
+        {
+          "className": "NumberValue",
+          "properties": {
+            "Name": "HP",
+            "Value": 80
+          }
+        },
+        {
+          "className": "NumberValue",
+          "properties": {
+            "Name": "AttackRange",
+            "Value": 4
+          }
+        },
+        {
+          "className": "NumberValue",
+          "properties": {
+            "Name": "Cooldown",
+            "Value": 1.2
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "className": "Frame",
+  "properties": {
+    "Name": "MainFrame",
+    "Size": [0, 300, 0, 240],
+    "Position": [0, 20, 0, 20],
+    "BackgroundTransparency": 0.2
+  }
+}

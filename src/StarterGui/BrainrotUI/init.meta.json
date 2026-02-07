@@ -1,0 +1,7 @@
+{
+  "className": "ScreenGui",
+  "properties": {
+    "Name": "BrainrotUI",
+    "ResetOnSpawn": false
+  }
+}

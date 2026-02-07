@@ -1,0 +1,9 @@
+{
+  "className": "TextLabel",
+  "properties": {
+    "Name": "BoneLabel",
+    "Text": "Bone: 0",
+    "Size": [0, 260, 0, 20],
+    "Position": [0, 10, 0, 72]
+  }
+}

@@ -7,7 +7,6 @@ sourcemap.json
 
 # Roblox Studio temp
 *.lock
-*.meta.json
 
 # Packages
 node_modules

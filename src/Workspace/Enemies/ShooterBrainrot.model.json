@@ -1,0 +1,78 @@
+{
+  "className": "Model",
+  "properties": {
+    "Name": "ShooterBrainrot"
+  },
+  "children": [
+    {
+      "className": "Part",
+      "properties": {
+        "Name": "HumanoidRootPart",
+        "Size": [2, 2, 2],
+        "Position": [18, 3, 0],
+        "Anchored": false,
+        "CanCollide": true
+      },
+      "children": [
+        {
+          "className": "Attachment",
+          "properties": {
+            "Name": "Hitbox"
+          }
+        }
+      ]
+    },
+    {
+      "className": "Humanoid",
+      "properties": {
+        "Name": "Humanoid",
+        "MaxHealth": 90,
+        "Health": 90
+      },
+      "children": [
+        {
+          "className": "Animator",
+          "properties": {
+            "Name": "Animator"
+          }
+        }
+      ]
+    },
+    {
+      "className": "Folder",
+      "properties": {
+        "Name": "Config"
+      },
+      "children": [
+        {
+          "className": "NumberValue",
+          "properties": {
+            "Name": "Damage",
+            "Value": 9
+          }
+        },
+        {
+          "className": "NumberValue",
+          "properties": {
+            "Name": "HP",
+            "Value": 90
+          }
+        },
+        {
+          "className": "NumberValue",
+          "properties": {
+            "Name": "AttackRange",
+            "Value": 8
+          }
+        },
+        {
+          "className": "NumberValue",
+          "properties": {
+            "Name": "Cooldown",
+            "Value": 1.4
+          }
+        }
+      ]
+    }
+  ]
+}

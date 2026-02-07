@@ -5,10 +5,16 @@
     "ServerScriptService": {
       "$path": "src/ServerScriptService"
     },
+    "Workspace": {
+      "$path": "src/Workspace"
+    },
     "StarterPlayer": {
       "StarterPlayerScripts": {
         "$path": "src/StarterPlayerScripts"
       }
+    },
+    "StarterGui": {
+      "$path": "src/StarterGui"
     },
     "ReplicatedStorage": {
       "$path": "src/ReplicatedStorage"

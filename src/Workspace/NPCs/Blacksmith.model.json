@@ -1,0 +1,37 @@
+{
+  "className": "Model",
+  "properties": {
+    "Name": "Blacksmith"
+  },
+  "children": [
+    {
+      "className": "Part",
+      "properties": {
+        "Name": "HumanoidRootPart",
+        "Size": [2, 3, 1],
+        "Position": [0, 3, 12],
+        "Anchored": true,
+        "CanCollide": true
+      },
+      "children": [
+        {
+          "className": "ProximityPrompt",
+          "properties": {
+            "Name": "UpgradePrompt",
+            "ActionText": "Upgrade",
+            "ObjectText": "Blacksmith",
+            "HoldDuration": 0.2
+          }
+        }
+      ]
+    },
+    {
+      "className": "Humanoid",
+      "properties": {
+        "Name": "Humanoid",
+        "MaxHealth": 100,
+        "Health": 100
+      }
+    }
+  ]
+}

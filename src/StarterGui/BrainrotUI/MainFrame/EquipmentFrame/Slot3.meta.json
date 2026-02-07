@@ -1,0 +1,9 @@
+{
+  "className": "TextLabel",
+  "properties": {
+    "Name": "Slot3",
+    "Text": "Slot 3: Empty (Common)",
+    "Size": [0, 260, 0, 20],
+    "Position": [0, 10, 0, 70]
+  }
+}

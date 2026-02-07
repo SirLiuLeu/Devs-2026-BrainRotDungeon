@@ -1,0 +1,78 @@
+{
+  "className": "Model",
+  "properties": {
+    "Name": "TankBrainrot"
+  },
+  "children": [
+    {
+      "className": "Part",
+      "properties": {
+        "Name": "HumanoidRootPart",
+        "Size": [3, 3, 2],
+        "Position": [12, 3, 0],
+        "Anchored": false,
+        "CanCollide": true
+      },
+      "children": [
+        {
+          "className": "Attachment",
+          "properties": {
+            "Name": "Hitbox"
+          }
+        }
+      ]
+    },
+    {
+      "className": "Humanoid",
+      "properties": {
+        "Name": "Humanoid",
+        "MaxHealth": 200,
+        "Health": 200
+      },
+      "children": [
+        {
+          "className": "Animator",
+          "properties": {
+            "Name": "Animator"
+          }
+        }
+      ]
+    },
+    {
+      "className": "Folder",
+      "properties": {
+        "Name": "Config"
+      },
+      "children": [
+        {
+          "className": "NumberValue",
+          "properties": {
+            "Name": "Damage",
+            "Value": 12
+          }
+        },
+        {
+          "className": "NumberValue",
+          "properties": {
+            "Name": "HP",
+            "Value": 200
+          }
+        },
+        {
+          "className": "NumberValue",
+          "properties": {
+            "Name": "AttackRange",
+            "Value": 5
+          }
+        },
+        {
+          "className": "NumberValue",
+          "properties": {
+            "Name": "Cooldown",
+            "Value": 1.6
+          }
+        }
+      ]
+    }
+  ]
+}

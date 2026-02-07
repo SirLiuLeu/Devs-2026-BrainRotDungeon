@@ -1,0 +1,9 @@
+{
+  "className": "Frame",
+  "properties": {
+    "Name": "UpgradeFrame",
+    "Size": [0, 280, 0, 80],
+    "Position": [0, 10, 0, 150],
+    "Visible": false
+  }
+}

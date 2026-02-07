@@ -1,0 +1,9 @@
+{
+  "className": "TextLabel",
+  "properties": {
+    "Name": "UpgradeLabel",
+    "Text": "Blacksmith Upgrade",
+    "Size": [0, 260, 0, 20],
+    "Position": [0, 10, 0, 0]
+  }
+}

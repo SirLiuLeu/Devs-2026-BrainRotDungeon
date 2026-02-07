@@ -1,0 +1,9 @@
+{
+  "className": "Frame",
+  "properties": {
+    "Name": "StatsFrame",
+    "Size": [0, 280, 0, 180],
+    "Position": [0, 10, 0, 50],
+    "Visible": true
+  }
+}

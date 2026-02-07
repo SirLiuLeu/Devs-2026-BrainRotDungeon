@@ -1,0 +1,9 @@
+{
+  "className": "TextButton",
+  "properties": {
+    "Name": "EquipmentTabButton",
+    "Text": "Equipment",
+    "Size": [0, 140, 0, 30],
+    "Position": [0, 150, 0, 10]
+  }
+}

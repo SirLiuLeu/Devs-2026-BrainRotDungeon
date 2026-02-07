@@ -1,0 +1,9 @@
+{
+  "className": "TextButton",
+  "properties": {
+    "Name": "UpgradeButton",
+    "Text": "Upgrade",
+    "Size": [0, 120, 0, 24],
+    "Position": [0, 10, 0, 46]
+  }
+}

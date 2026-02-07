@@ -1,0 +1,78 @@
+{
+  "className": "Model",
+  "properties": {
+    "Name": "FastBrainrot"
+  },
+  "children": [
+    {
+      "className": "Part",
+      "properties": {
+        "Name": "HumanoidRootPart",
+        "Size": [2, 2, 1],
+        "Position": [6, 3, 0],
+        "Anchored": false,
+        "CanCollide": true
+      },
+      "children": [
+        {
+          "className": "Attachment",
+          "properties": {
+            "Name": "Hitbox"
+          }
+        }
+      ]
+    },
+    {
+      "className": "Humanoid",
+      "properties": {
+        "Name": "Humanoid",
+        "MaxHealth": 60,
+        "Health": 60
+      },
+      "children": [
+        {
+          "className": "Animator",
+          "properties": {
+            "Name": "Animator"
+          }
+        }
+      ]
+    },
+    {
+      "className": "Folder",
+      "properties": {
+        "Name": "Config"
+      },
+      "children": [
+        {
+          "className": "NumberValue",
+          "properties": {
+            "Name": "Damage",
+            "Value": 5
+          }
+        },
+        {
+          "className": "NumberValue",
+          "properties": {
+            "Name": "HP",
+            "Value": 60
+          }
+        },
+        {
+          "className": "NumberValue",
+          "properties": {
+            "Name": "AttackRange",
+            "Value": 4
+          }
+        },
+        {
+          "className": "NumberValue",
+          "properties": {
+            "Name": "Cooldown",
+            "Value": 0.6
+          }
+        }
+      ]
+    }
+  ]
+}
