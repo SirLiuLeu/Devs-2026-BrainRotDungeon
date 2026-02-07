@@ -1,4 +1,4 @@
-local SkillConfig = {
+local Skills = {
     Basic = {
         DamagePercent = 1.0,
         Range = 20,
@@ -13,4 +13,4 @@ local SkillConfig = {
     },
 }
 
-return SkillConfig
+return Skills

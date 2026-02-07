@@ -1,0 +1,3 @@
+local SpawnRules = {}
+
+return SpawnRules

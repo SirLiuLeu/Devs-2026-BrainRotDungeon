@@ -3,6 +3,7 @@ local UIS = game:GetService("UserInputService")
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Remote = ReplicatedStorage.Shared.Remotes.UseSkill
+local CooldownState = require(ReplicatedStorage.Shared.Runtime.CooldownState)
 
 
 local WeaponClient = {}
@@ -44,7 +45,9 @@ end
 -- ========== CORE ==========
 function WeaponClient:PlayAttack(attackName, animId, trail, Cooldown)
 	if not self.canAttack or not self.Animator then return end
+	if not CooldownState:IsReady(attackName) then return end
 	self.canAttack = false
+	CooldownState:MarkPredicted(attackName, Cooldown)
 	
 	local animId = animId
 	if not animId then

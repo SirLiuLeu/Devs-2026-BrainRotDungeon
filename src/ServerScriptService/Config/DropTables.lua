@@ -1,4 +1,4 @@
-local DropTableConfig = {
+local DropTables = {
     BrainrotBasic = {
         Rolls = 1,
         Items = {
@@ -13,7 +13,6 @@ local DropTableConfig = {
             GuaranteedAt = 80,
         },
     },
-
     BrainrotElite = {
         Rolls = 1,
         Items = {
@@ -29,7 +28,6 @@ local DropTableConfig = {
             GuaranteedAt = 60,
         },
     },
-
     BrainrotBoss = {
         Rolls = 2,
         Items = {
@@ -47,4 +45,4 @@ local DropTableConfig = {
     },
 }
 
-return DropTableConfig
+return DropTables

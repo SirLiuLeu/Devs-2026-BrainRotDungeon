@@ -1,0 +1,25 @@
+{
+  "modelPath": "Workspace/Enemies/BrainrotGolem",
+  "structure": {
+    "HumanoidRootPart": "Part",
+    "Humanoid": {
+      "Animator": "Animator"
+    },
+    "Assets": {
+      "Animations": {
+        "Idle": "Animation",
+        "Run": "Animation",
+        "Attack": "Animation"
+      },
+      "Sounds": {
+        "Attack": "Sound"
+      },
+      "VFX": {
+        "Part": "Part"
+      }
+    }
+  },
+  "attributes": {
+    "MonsterId": "string"
+  }
+}

@@ -1,8 +1,7 @@
 local Players = game:GetService("Players")
-local ServerScriptService = game:GetService("ServerScriptService")
 local Enemies = workspace:WaitForChild("Enemies")
 
-local MonsterConfig = require(ServerScriptService.Data.MonsterConfig)
+local MonsterConfig = require(game:GetService("ReplicatedStorage").Shared.Config.Monsters)
 
 local ATTACK_COOLDOWN = 1
 

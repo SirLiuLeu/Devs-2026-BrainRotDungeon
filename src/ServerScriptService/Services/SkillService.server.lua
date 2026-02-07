@@ -2,15 +2,14 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local Remote = ReplicatedStorage.Shared.Remotes.UseSkill
 
-local SkillConfig = require(ServerScriptService.Data.SkillConfig)
+local CooldownService = require(ServerScriptService.Systems.CooldownService)
+local SkillConfig = require(ReplicatedStorage.Shared.Config.Skills)
 
-local Cooldown = {}
 local COOLDOWN_TIME = 1.5
 Remote.OnServerEvent:Connect(function(player, mode, skillName)
 	if mode ~= "Hit" then return end
-	-- cooldown
-	if Cooldown[player] then return end
-	Cooldown[player] = true
+	if not CooldownService:IsReady(player, skillName) then return end
+	CooldownService:StartCooldown(player, skillName, COOLDOWN_TIME)
 
 	local char = player.Character
 	if not char then return end
@@ -43,7 +42,4 @@ Remote.OnServerEvent:Connect(function(player, mode, skillName)
 		end
 	end
 
-	task.delay(COOLDOWN_TIME, function()
-		Cooldown[player] = nil
-	end)
 end)
