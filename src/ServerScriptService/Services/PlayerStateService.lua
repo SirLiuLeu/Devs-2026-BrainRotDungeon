@@ -3,7 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Progression = require(ReplicatedStorage.Shared.Config.Progression)
 
-local Remotes = ReplicatedStorage:FindFirstChild("Remotes")
+local Remotes = ReplicatedStorage.Shared:FindFirstChild("Remotes")
 local StateUpdate = Remotes and Remotes:FindFirstChild("StateUpdate")
 
 local PlayerStateService = {}
