@@ -1,7 +1,7 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
-local controllers = script.Parent:WaitForChild("Client"):WaitForChild("Controllers")
+local controllers = script.Parent.Parent:WaitForChild("Client"):WaitForChild("Controllers")
 local WeaponClient = require(controllers:WaitForChild("WeaponClient"))
 local WeaponController = require(controllers:WaitForChild("WeaponController"))
 local WeaponInput = require(controllers:WaitForChild("WeaponInput"))
