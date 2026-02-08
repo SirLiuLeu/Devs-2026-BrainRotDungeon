@@ -1,17 +1,9 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
-local Weapons = require(ReplicatedStorage.Shared.Config.Weapons)
 local PlayerStateService = require(ServerScriptService.Services.PlayerStateService)
 
 local StatService = {}
-
-local function getWeaponConfig(weaponId)
-	if weaponId and Weapons[weaponId] then
-		return Weapons[weaponId]
-	end
-	return Weapons.Basic
-end
 
 local function getValueFromContainer(container, statName)
 	if not container then
@@ -37,25 +29,8 @@ local function getPlayerData(player)
 end
 
 local function resolveBaseStats(player)
-	local data = getPlayerData(player)
-	local baseStats = data and data:FindFirstChild("BasePlayerStats")
-	if baseStats then
-		return baseStats
-	end
 	local state = PlayerStateService:GetState(player)
-	return state and state.Stats or nil
-end
-
-local function resolveWeaponStats(player, weaponId)
-	local data = getPlayerData(player)
-	local weaponStats = data and data:FindFirstChild("WeaponStats")
-	if weaponStats then
-		return weaponStats
-	end
-	local weaponConfig = getWeaponConfig(weaponId or player:GetAttribute("EquippedWeaponId"))
-	return {
-		Damage = weaponConfig.Damage or 0,
-	}
+	return state and state.FinalStats or nil
 end
 
 local function resolveModifiers(player, name)
@@ -66,38 +41,50 @@ local function resolveModifiers(player, name)
 	return data:FindFirstChild(name)
 end
 
-function StatService:GetFinalDamage(player, weaponId)
+function StatService:GetFinalStats(player)
 	if not player or not player:IsA("Player") then
-		return 0
+		return {
+			MaxHP = 0,
+			Damage = 0,
+			Defense = 0,
+			MoveSpeed = 0,
+		}
 	end
 
 	local baseStats = resolveBaseStats(player)
-	local weaponStats = resolveWeaponStats(player, weaponId)
 	local petModifiers = resolveModifiers(player, "PetModifiers")
 	local boostModifiers = resolveModifiers(player, "BoostModifiers")
 
 	local baseDamage = getValueFromContainer(baseStats, "Damage")
-	local weaponDamage = getValueFromContainer(weaponStats, "Damage")
 	local petDamage = getValueFromContainer(petModifiers, "Damage")
 	local boostDamage = getValueFromContainer(boostModifiers, "Damage")
-
-	return math.max(0, baseDamage + weaponDamage + petDamage + boostDamage)
-end
-
-function StatService:GetMaxHP(player)
-	if not player or not player:IsA("Player") then
-		return 0
-	end
-
-	local baseStats = resolveBaseStats(player)
-	local petModifiers = resolveModifiers(player, "PetModifiers")
-	local boostModifiers = resolveModifiers(player, "BoostModifiers")
 
 	local baseHp = getValueFromContainer(baseStats, "MaxHP")
 	local petHp = getValueFromContainer(petModifiers, "MaxHP")
 	local boostHp = getValueFromContainer(boostModifiers, "MaxHP")
 
-	return math.max(0, baseHp + petHp + boostHp)
+	local baseDefense = getValueFromContainer(baseStats, "Defense")
+	local petDefense = getValueFromContainer(petModifiers, "Defense")
+	local boostDefense = getValueFromContainer(boostModifiers, "Defense")
+
+	local baseMoveSpeed = getValueFromContainer(baseStats, "MoveSpeed")
+	local petMoveSpeed = getValueFromContainer(petModifiers, "MoveSpeed")
+	local boostMoveSpeed = getValueFromContainer(boostModifiers, "MoveSpeed")
+
+	return {
+		MaxHP = math.max(0, baseHp + petHp + boostHp),
+		Damage = math.max(0, baseDamage + petDamage + boostDamage),
+		Defense = math.max(0, baseDefense + petDefense + boostDefense),
+		MoveSpeed = math.max(0, baseMoveSpeed + petMoveSpeed + boostMoveSpeed),
+	}
+end
+
+function StatService:GetMaxHP(player)
+	return self:GetFinalStats(player).MaxHP
+end
+
+function StatService:GetFinalDamage(player)
+	return self:GetFinalStats(player).Damage
 end
 
 return StatService

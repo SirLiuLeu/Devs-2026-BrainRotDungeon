@@ -19,23 +19,23 @@ local function getPlayerCooldowns(player)
 	return data
 end
 
-function CooldownService:GetNextReady(player, skillId)
+function CooldownService:GetNextReady(player, skillSlot)
 	local cooldowns = getPlayerCooldowns(player)
-	return cooldowns[skillId] or 0
+	return cooldowns[skillSlot] or 0
 end
 
-function CooldownService:IsReady(player, skillId)
+function CooldownService:IsReady(player, skillSlot)
 	local now = os.clock()
-	local nextReady = self:GetNextReady(player, skillId)
+	local nextReady = self:GetNextReady(player, skillSlot)
 	return now >= nextReady
 end
 
-function CooldownService:StartCooldown(player, skillId, duration)
+function CooldownService:StartCooldown(player, skillSlot, duration)
 	local now = os.clock()
 	local nextReady = now + duration
 	local cooldowns = getPlayerCooldowns(player)
-	cooldowns[skillId] = nextReady
-	Remote:FireClient(player, "CooldownStart", skillId, nextReady)
+	cooldowns[skillSlot] = nextReady
+	Remote:FireClient(player, "CooldownStart", skillSlot, nextReady)
 	return nextReady
 end
 

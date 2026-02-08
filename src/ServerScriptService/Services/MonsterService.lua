@@ -3,106 +3,212 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Monsters = require(ReplicatedStorage.Shared.Config.Monsters)
 local CombatService = require(script.Parent.CombatService)
+local RewardService = require(script.Parent.RewardService)
 
 local MonsterService = {}
 
 local function getMonsterConfig(monster)
-    return Monsters[monster.Name] or Monsters.Default
+	return Monsters[monster.Name]
+		or (Monsters.DesignCatalog and Monsters.DesignCatalog[monster.Name])
+		or Monsters.Default
 end
 
-local function resolveTargetCharacter(target)
-    if typeof(target) ~= "Instance" then
-        return nil
-    end
+local function applyMonsterConfig(monster, configData)
+	local config = monster:FindFirstChild("Config")
+	if not config then
+		config = Instance.new("Folder")
+		config.Name = "Config"
+		config.Parent = monster
+	end
 
-    if target:IsA("Player") then
-        return target.Character
-    end
+	local function setConfigValue(name, value)
+		local valueObject = config:FindFirstChild(name)
+		if not valueObject then
+			valueObject = Instance.new("NumberValue")
+			valueObject.Name = name
+			valueObject.Parent = config
+		end
+		valueObject.Value = value
+		return valueObject
+	end
 
-    if target:IsA("Model") then
-        return target
-    end
+	local stats = configData.Stats or configData
+	local attackRangeValue = setConfigValue("AttackRange", stats.AttackRange or stats.Range or 5)
+	local aggroRangeValue = setConfigValue("AggroRange", stats.AggroRange or 25)
+	local damageValue = setConfigValue("Damage", stats.Damage or 10)
+	local cooldownValue = setConfigValue("AttackCooldown", stats.Cooldown or stats.AttackCooldown or 1)
 
-    return nil
+	local humanoid = monster:FindFirstChild("Humanoid")
+	if humanoid and stats.HP then
+		humanoid.MaxHealth = stats.HP
+		humanoid.Health = humanoid.MaxHealth
+	elseif humanoid and configData.MaxHP then
+		humanoid.MaxHealth = configData.MaxHP
+		humanoid.Health = humanoid.MaxHealth
+	end
+
+	return config, attackRangeValue, aggroRangeValue, damageValue, cooldownValue
 end
 
-function MonsterService:UpdateAggro(monster, dt)
-    if not monster or not monster:IsA("Model") then
-        return nil
-    end
-
-    local primary = monster.PrimaryPart or monster:FindFirstChild("HumanoidRootPart")
-    if not primary then
-        return nil
-    end
-
-    local config = getMonsterConfig(monster)
-    local aggroRange = config.AggroRange or 0
-    local closest
-    local minDist = aggroRange
-
-    for _, player in Players:GetPlayers() do
-        local character = player.Character
-        local hrp = character and character:FindFirstChild("HumanoidRootPart")
-        local humanoid = character and character:FindFirstChild("Humanoid")
-        if hrp and humanoid and humanoid.Health > 0 then
-            local dist = (hrp.Position - primary.Position).Magnitude
-            if dist <= minDist then
-                minDist = dist
-                closest = player
-            end
-        end
-    end
-
-    if closest then
-        monster:SetAttribute("AggroTargetId", closest.UserId)
-        return closest
-    end
-
-    monster:SetAttribute("AggroTargetId", nil)
-    return nil
+local function getNearestPlayer(monster, range)
+	local nearest, minDist = nil, range
+	for _, plr in Players:GetPlayers() do
+		local char = plr.Character
+		local hrp = char and char:FindFirstChild("HumanoidRootPart")
+		local hum = char and char:FindFirstChild("Humanoid")
+		if hrp and hum and hum.Health > 0 then
+			local dist = (hrp.Position - monster.PrimaryPart.Position).Magnitude
+			if dist < minDist then
+				nearest, minDist = char, dist
+			end
+		end
+	end
+	return nearest, minDist
 end
 
-function MonsterService:PerformAttack(monster, target)
-    if not monster or not monster:IsA("Model") then
-        return false
-    end
+local function setupMonster(monster, enemies)
+	if not monster:IsA("Model") then
+		return
+	end
 
-    local primary = monster.PrimaryPart or monster:FindFirstChild("HumanoidRootPart")
-    if not primary then
-        return false
-    end
+	local humanoid = monster:FindFirstChild("Humanoid")
+	local animator = humanoid and humanoid:FindFirstChild("Animator")
+	local animations = ReplicatedStorage:FindFirstChild("Assets")
+		and ReplicatedStorage.Assets:FindFirstChild("Animations")
+		and ReplicatedStorage.Assets.Animations:FindFirstChild("Monster")
+		and ReplicatedStorage.Assets.Animations.Monster:FindFirstChild(monster.Name)
+	if not humanoid or not animator then
+		return
+	end
 
-    local config = getMonsterConfig(monster)
-    local attackRange = config.AttackRange or 0
-    local cooldown = config.AttackCooldown or 1
+	local primaryPart = monster.PrimaryPart or monster:FindFirstChild("HumanoidRootPart")
+	if not primaryPart then
+		return
+	end
+	monster.PrimaryPart = primaryPart
 
-    local targetCharacter = resolveTargetCharacter(target)
-    if not targetCharacter then
-        return false
-    end
+	local configData = getMonsterConfig(monster)
+	local _, attackRangeValue, aggroRangeValue, damageValue, cooldownValue = applyMonsterConfig(monster, configData)
+	if not attackRangeValue or not aggroRangeValue or not damageValue or not cooldownValue then
+		return
+	end
 
-    local targetRoot = targetCharacter:FindFirstChild("HumanoidRootPart")
-    local targetHumanoid = targetCharacter:FindFirstChild("Humanoid")
-    if not targetRoot or not targetHumanoid or targetHumanoid.Health <= 0 then
-        return false
-    end
+	local homeCFrame = monster.PrimaryPart.CFrame
+	local returning = false
+	local lastAttack = 0
 
-    if (targetRoot.Position - primary.Position).Magnitude > attackRange then
-        return false
-    end
+	local runTrack
+	local attackTrack
+	if animations then
+		if animations:FindFirstChild("Run") then
+			runTrack = animator:LoadAnimation(animations.Run)
+			runTrack.Priority = Enum.AnimationPriority.Movement
+		end
+		if animations:FindFirstChild("Attack") then
+			attackTrack = animator:LoadAnimation(animations.Attack)
+		end
+	end
 
-    local lastAttack = monster:GetAttribute("LastAttackTime") or 0
-    if os.clock() - lastAttack < cooldown then
-        return false
-    end
+	humanoid.Died:Connect(function()
+		RewardService:HandleMonsterDeath(monster)
+	end)
 
-    monster:SetAttribute("LastAttackTime", os.clock())
+	local function stopRun()
+		if runTrack and runTrack.IsPlaying then
+			runTrack:Stop()
+		end
+	end
 
-    local targetPlayer = Players:GetPlayerFromCharacter(targetCharacter)
-    CombatService:ApplyDamage(monster, targetPlayer or targetCharacter, nil)
+	local function chase(target)
+		local hrp = target:FindFirstChild("HumanoidRootPart")
+		if not hrp then
+			return
+		end
 
-    return true
+		humanoid:MoveTo(hrp.Position)
+		if runTrack and not runTrack.IsPlaying then
+			runTrack:Play()
+		end
+	end
+
+	local function returnHome()
+		if returning then
+			return
+		end
+		returning = true
+		stopRun()
+		humanoid:MoveTo(homeCFrame.Position)
+
+		task.spawn(function()
+			humanoid.MoveToFinished:Wait()
+			returning = false
+		end)
+	end
+
+	local function attack(target)
+		if os.clock() - lastAttack < cooldownValue.Value then
+			return
+		end
+		lastAttack = os.clock()
+
+		stopRun()
+
+		if attackTrack and not attackTrack.IsPlaying then
+			attackTrack:Play()
+		end
+		if not monster:IsDescendantOf(enemies) or not monster.PrimaryPart then
+			return
+		end
+
+		local hum = target:FindFirstChild("Humanoid")
+		if not hum or hum.Health <= 0 then
+			return
+		end
+
+		local range = attackRangeValue.Value
+
+		local hrp = target:FindFirstChild("HumanoidRootPart")
+		if not hrp then
+			return
+		end
+
+		if (hrp.Position - monster.PrimaryPart.Position).Magnitude > range then
+			return
+		end
+
+		local targetPlayer = Players:GetPlayerFromCharacter(target)
+		CombatService:ApplyDamage(monster, targetPlayer or target, nil)
+	end
+
+	task.spawn(function()
+		while monster:IsDescendantOf(enemies) do
+			if humanoid.Health <= 0 then
+				stopRun()
+				task.wait(0.2)
+			else
+				local target, dist = getNearestPlayer(monster, aggroRangeValue.Value)
+
+				if not target then
+					returnHome()
+				elseif dist > attackRangeValue.Value then
+					chase(target)
+				else
+					attack(target)
+				end
+				task.wait(0.2)
+			end
+		end
+	end)
+end
+
+function MonsterService:Start(enemiesFolder)
+	local enemies = enemiesFolder or workspace:WaitForChild("Enemies")
+	for _, monster in ipairs(enemies:GetChildren()) do
+		setupMonster(monster, enemies)
+	end
+	enemies.ChildAdded:Connect(function(monster)
+		setupMonster(monster, enemies)
+	end)
 end
 
 return MonsterService

@@ -43,11 +43,11 @@ end
 
 
 -- ========== CORE ==========
-function WeaponClient:PlayAttack(attackName, animId, trail, Cooldown)
+function WeaponClient:PlayAttack(skillSlot, animId, trail, Cooldown)
 	if not self.canAttack or not self.Animator then return end
-	if not CooldownState:IsReady(attackName) then return end
+	if not CooldownState:IsReady(skillSlot) then return end
 	self.canAttack = false
-	CooldownState:MarkPredicted(attackName, Cooldown)
+	CooldownState:MarkPredicted(skillSlot, Cooldown)
 	
 	local animId = animId
 	if not animId then
@@ -67,7 +67,7 @@ function WeaponClient:PlayAttack(attackName, animId, trail, Cooldown)
 
 	task.delay(hitTime, function()
 		self.Trail.Enabled = true
-		Remote:FireServer("Hit", attackName)
+		Remote:FireServer("Hit", skillSlot)
 	end)
 
 	task.delay(hitTime + trail, function()
