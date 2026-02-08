@@ -1,0 +1,38 @@
+Reward Rules
+
+Player nhận exp/gold nếu:
+|monsterLevel - playerLevel| <= 10
+
+Bone không giới hạn level
+
+Boss:
+
+last hit: 30% bone
+
+còn lại chia theo damage %
+
+Room Rules
+
+Player rời room:
+
+mất aggro
+
+mất contribution
+
+Monster không chase qua room
+
+AutoFarm Rules
+
+Tick 0.2s
+
+Chỉ basic attack
+
+Không dùng skill
+
+Nếu mất target → tìm lại
+
+Data Safety Rules
+
+Mọi PlayerData sửa chỉ qua service
+
+Không script nào edit trực tiếp PlayerData

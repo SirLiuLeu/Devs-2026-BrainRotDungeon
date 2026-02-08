@@ -1,0 +1,139 @@
+1) World & Room System
+
+Quản lý map dungeon dạng nhiều phòng.
+
+Chịu trách nhiệm
+
+Player vào / rời phòng
+
+Monster chỉ tương tác cùng RoomId
+
+Boss spawn theo phòng (104, 204, 304...)
+
+Reset aggro khi rời phòng
+
+System name
+
+RoomService
+
+2) Monster AI System
+
+Điều khiển Brainrot, Elite, Boss.
+
+Chịu trách nhiệm
+
+Aggro
+
+Move
+
+Attack
+
+Think loop
+
+Boss skill
+
+Target switching
+
+System name
+
+MonsterService
+
+3) Combat System
+
+Tất cả damage, hit detection, death.
+
+Chịu trách nhiệm
+
+Validate attack
+
+Cooldown
+
+Hit detection
+
+Damage apply
+
+Death trigger
+
+System name
+
+CombatService
+
+4) Stat Calculation System
+
+Tính toán mọi chỉ số cuối cùng.
+
+Nguồn stat
+
+Base player
+
+Equipment
+
+Pet
+
+Skill passive
+
+Boost/VIP
+
+System name
+
+StatService
+
+5) Reward & Drop System
+
+Xử lý exp, gold, bone, item, boss contribution.
+
+Chịu trách nhiệm
+
+Monster death reward
+
+Boss contribution reward
+
+Level range rule
+
+Drop tables
+
+System name
+
+RewardService
+
+6) Progression System
+
+Level, rebirth, stat points.
+
+System name
+
+ProgressionService
+
+7) Inventory & Equipment System
+
+Trang bị + random stats.
+
+System name
+
+InventoryService
+EquipmentService
+
+8) Skill System
+
+Active + passive skill + upgrade.
+
+System name
+
+SkillService
+
+9) Pet System
+
+Pet buff + level bằng Bone.
+
+System name
+
+PetService
+
+10) Auto Farm System
+
+Client state machine gửi intent.
+
+System name
+
+AutoFarmController (client)
+AutoFarmService (server validate)

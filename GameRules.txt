@@ -1,0 +1,85 @@
+Game runs on event driven simulation.
+
+Core Events:
+
+OnPlayerEnterRoom(player, roomId)
+OnPlayerLeaveRoom(player, roomId)
+
+OnMonsterSpawn(monster)
+OnMonsterAggro(monster, player)
+OnMonsterDeath(monster, killer)
+
+OnPlayerAttackRequest(player)
+OnDamageApplied(source, target, amount)
+OnPlayerDeath(player)
+
+OnBossSpawn(boss, roomId)
+OnBossDeath(boss)
+
+OnRewardGranted(player, rewards)
+
+---
+
+Combat Flow:
+
+Client → AttackIntent
+Server:
+ValidateCooldown
+DetectHit
+ApplyDamage
+If target HP <= 0:
+Trigger OnMonsterDeath
+
+---
+
+Monster Death Flow:
+
+OnMonsterDeath:
+CalculateContribution
+CalculateReward
+GrantReward
+DespawnMonster
+SpawnNextMonster
+
+---
+
+AutoFarm State Machine:
+
+IDLE
+→ SEARCH_TARGET
+→ MOVE_TO_TARGET
+→ ATTACK
+→ TARGET_LOST → SEARCH_TARGET
+
+Runs every 0.2 seconds
+
+---
+
+Boss Contribution System:
+
+Each boss has table:
+DamageContribution[player] += damage
+
+Reset when boss dies or despawns
+
+---
+
+Player Stat Update Flow:
+
+When equipment/stat/pet changes:
+RecalculateStats(player)
+
+---
+
+Regen Tick:
+
+Runs every 1 second:
+ApplyHPRegen
+ApplyPassiveHeal
+
+---
+
+Room Rules:
+
+Players and monsters interact ONLY if same RoomId
+Leaving room cancels aggro and contribution
