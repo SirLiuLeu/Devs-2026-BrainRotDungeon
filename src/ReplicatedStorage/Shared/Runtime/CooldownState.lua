@@ -13,8 +13,8 @@ local function getServerTime()
 	return os.clock() + timeOffset
 end
 
-function CooldownState:GetRemaining(skillId)
-	local nextReady = nextReadyBySkill[skillId] or 0
+function CooldownState:GetRemaining(skillSlot)
+	local nextReady = nextReadyBySkill[skillSlot] or 0
 	local remaining = nextReady - getServerTime()
 	if remaining < 0 then
 		return 0
@@ -22,41 +22,41 @@ function CooldownState:GetRemaining(skillId)
 	return remaining
 end
 
-function CooldownState:IsReady(skillId)
-	return self:GetRemaining(skillId) <= 0
+function CooldownState:IsReady(skillSlot)
+	return self:GetRemaining(skillSlot) <= 0
 end
 
-function CooldownState:MarkPredicted(skillId, duration)
+function CooldownState:MarkPredicted(skillSlot, duration)
 	if not duration then
 		return
 	end
 	local predictedReady = getServerTime() + duration
-	local existing = nextReadyBySkill[skillId] or 0
+	local existing = nextReadyBySkill[skillSlot] or 0
 	if predictedReady > existing then
-		nextReadyBySkill[skillId] = predictedReady
+		nextReadyBySkill[skillSlot] = predictedReady
 	end
 end
 
-local function applyServerReady(skillId, nextReady)
+local function applyServerReady(skillSlot, nextReady)
 	if typeof(nextReady) ~= "number" then
 		return
 	end
-	local existing = nextReadyBySkill[skillId] or 0
+	local existing = nextReadyBySkill[skillSlot] or 0
 	if nextReady > existing then
-		nextReadyBySkill[skillId] = nextReady
+		nextReadyBySkill[skillSlot] = nextReady
 	end
 end
 
-Remote.OnClientEvent:Connect(function(mode, skillId, payload)
+Remote.OnClientEvent:Connect(function(mode, skillSlot, payload)
 	if mode == "CooldownSync" then
-		if typeof(skillId) == "number" then
-			timeOffset = skillId - os.clock()
+		if typeof(skillSlot) == "number" then
+			timeOffset = skillSlot - os.clock()
 		end
 		return
 	end
 
 	if mode == "CooldownStart" then
-		applyServerReady(skillId, payload)
+		applyServerReady(skillSlot, payload)
 	end
 end)
 

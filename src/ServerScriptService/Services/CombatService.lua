@@ -5,6 +5,7 @@ local Weapons = require(ReplicatedStorage.Shared.Config.Weapons)
 local Monsters = require(ReplicatedStorage.Shared.Config.Monsters)
 
 local PlayerStateService = require(script.Parent.PlayerStateService)
+local RewardService = require(script.Parent.RewardService)
 local StatService = require(script.Parent.Parent.Systems.StatService)
 
 local CombatService = {}
@@ -34,6 +35,16 @@ local function getWeaponConfig(weaponId)
         return Weapons[weaponId]
     end
     return Weapons.Basic
+end
+
+local function getMonsterConfig(monsterName)
+    if Monsters[monsterName] then
+        return Monsters[monsterName]
+    end
+    if Monsters.DesignCatalog and Monsters.DesignCatalog[monsterName] then
+        return Monsters.DesignCatalog[monsterName]
+    end
+    return nil
 end
 
 function CombatService:ValidateAttack(player, target)
@@ -112,16 +123,17 @@ function CombatService:ApplyDamage(attacker, target, weaponId)
         if targetPlayer then
             local targetState = PlayerStateService:GetState(targetPlayer)
             if targetState then
-                damage = math.max(1, damage - (targetState.Stats.Defense or 0))
+                damage = math.max(1, damage - (targetState.FinalStats.Defense or 0))
             end
         end
 
         targetHumanoid:TakeDamage(damage)
         state.Cooldowns.Attack = os.clock()
 
-        local monsterConfig = Monsters[targetCharacter.Name]
+        local monsterConfig = getMonsterConfig(targetCharacter.Name)
         if monsterConfig then
             targetCharacter:SetAttribute("LastHitPlayerId", attacker.UserId)
+            RewardService:TrackDamage(targetCharacter, attacker, damage)
         end
 
         return true
@@ -133,10 +145,8 @@ function CombatService:ApplyDamage(attacker, target, weaponId)
 
         local targetPlayer = Players:GetPlayerFromCharacter(targetCharacter)
         if targetPlayer then
-            local targetState = PlayerStateService:GetState(targetPlayer)
-            if targetState then
-                damage = math.max(1, damage - (targetState.Stats.Defense or 0))
-            end
+            local targetStats = StatService:GetFinalStats(targetPlayer)
+            damage = math.max(1, damage - (targetStats.Defense or 0))
         end
 
         targetHumanoid:TakeDamage(damage)
@@ -144,6 +154,54 @@ function CombatService:ApplyDamage(attacker, target, weaponId)
     end
 
     return false
+end
+
+function CombatService:ApplySkillDamage(player, target, skillConfig, weaponId)
+    if not player or not player:IsA("Player") or not skillConfig then
+        return false
+    end
+    local character = player.Character
+    local hrp = character and character:FindFirstChild("HumanoidRootPart")
+    local humanoid = character and character:FindFirstChild("Humanoid")
+    if not hrp or not humanoid or humanoid.Health <= 0 then
+        return false
+    end
+
+    local targetCharacter = resolveCharacter(target)
+    if not targetCharacter then
+        return false
+    end
+    local targetHumanoid = targetCharacter:FindFirstChild("Humanoid")
+    local targetRoot = targetCharacter:FindFirstChild("HumanoidRootPart")
+    if not targetHumanoid or not targetRoot or targetHumanoid.Health <= 0 then
+        return false
+    end
+
+    local range = skillConfig.Range or 0
+    if (targetRoot.Position - hrp.Position).Magnitude > range then
+        return false
+    end
+
+    local damagePercent = skillConfig.DamagePercent or 1
+    local damageFlat = skillConfig.DamageFlat or 0
+    local baseDamage = StatService:GetFinalDamage(player, weaponId)
+    local damage = math.max(0, baseDamage * damagePercent + damageFlat)
+
+    local targetPlayer = Players:GetPlayerFromCharacter(targetCharacter)
+    if targetPlayer then
+        local targetStats = StatService:GetFinalStats(targetPlayer)
+        damage = math.max(1, damage - (targetStats.Defense or 0))
+    end
+
+    targetHumanoid:TakeDamage(damage)
+
+    local monsterConfig = getMonsterConfig(targetCharacter.Name)
+    if monsterConfig then
+        targetCharacter:SetAttribute("LastHitPlayerId", player.UserId)
+        RewardService:TrackDamage(targetCharacter, player, damage)
+    end
+
+    return true
 end
 
 return CombatService
