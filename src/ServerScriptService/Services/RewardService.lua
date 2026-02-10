@@ -2,6 +2,9 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
+local Monsters = require(ReplicatedStorage.Shared.Config.Monsters)
+local DataConfig = require(ReplicatedStorage.Shared.Data.DataConfig)
+local DropResolver = require(ServerScriptService.Systems.DropResolver)
 local DropTables = require(ReplicatedStorage.Shared.Config.DropTables)
 local PlayerStateService = require(script.Parent.PlayerStateService)
 local InventoryService = require(script.Parent.InventoryService)
@@ -142,18 +145,6 @@ function RewardService:HandleMonsterDeath(monster)
 		end
 	elseif lastHitPlayer and RoomService:CanInteract(lastHitPlayer, monster) then
 		local playerLevel = getPlayerLevel(lastHitPlayer)
-<<<<<<< HEAD
-		if withinLevelRange(playerLevel, monsterLevel) then
-			grantExp(lastHitPlayer, rewards.Exp or 0)
-			grantGold(lastHitPlayer, rewards.Gold or 0)
-		end
-		grantDrops(lastHitPlayer, rewards.DropTable, 1)
-		QuestService:RecordEvent(lastHitPlayer, "KillMonster", { MonsterId = monster.Name })
-	end
-
-	local boneChance = rewards.BoneChance or 0
-	if boneChance > 0 and math.random() <= boneChance then
-=======
 		if withinLevelRange(playerLevel, rewardData.Level) then
 			PlayerStateService:AddExp(lastHitPlayer, rewardData.Exp)
 			PlayerStateService:AddGold(lastHitPlayer, rewardData.Gold)
@@ -163,18 +154,12 @@ function RewardService:HandleMonsterDeath(monster)
 
 	if rewardData.BoneChance > 0 and math.random() <= rewardData.BoneChance then
 		local damageEntry = damageByMonster[monster]
->>>>>>> 9fed1b41806a9158b6457d6769bae07483e61ef3
 		local baseBone = 1
 		if isBoss and damageEntry and damageEntry.total > 0 then
 			for userId, damage in pairs(damageEntry.byPlayer) do
 				local player = Players:GetPlayerByUserId(userId)
-<<<<<<< HEAD
-				if player and RoomService:CanInteract(player, monster) then
-					local share = (damage / damageEntry.total) * contributionPercent
-=======
 				if player then
 					local share = (damage / damageEntry.total) * rewardData.DamageContributionPercent
->>>>>>> 9fed1b41806a9158b6457d6769bae07483e61ef3
 					if lastHitId and userId == lastHitId then
 						share += rewardData.LastHitBonePercent
 					end
