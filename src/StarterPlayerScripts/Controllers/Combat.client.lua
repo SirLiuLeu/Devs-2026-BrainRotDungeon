@@ -54,7 +54,6 @@ end
 local function connectTool(tool)
 	if toolConnections[tool] then return end
 	if not tool:IsA("Tool") then return end
-    print("WeaponRuntime loaded for ", player.Name)
 	if not tool:FindFirstChild("WeaponTag") then return end
     
 	toolConnections[tool] = true

@@ -97,7 +97,8 @@ local function ensureFolder(parent, name)
 	end
 	return folder
 end
-
+print("PLACE ID", game.PlaceId)
+print("JOB ID", game.JobId)
 local function ensureValue(parent, name, className, value)
 	local valueObject = parent:FindFirstChild(name)
 	if not valueObject then
@@ -164,6 +165,7 @@ function PersistenceService:LoadProfile(player)
 	local success, stored = pcall(function()
 		return STORE:GetAsync(tostring(player.UserId))
 	end)
+	print("PersistenceService: Loaded profile for", player.Name, "Success:", success, stored)
 	local merged = success and mergeDefaults(defaults, stored) or defaults
 	self._profiles[player] = merged
 
