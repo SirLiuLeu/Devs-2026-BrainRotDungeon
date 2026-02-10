@@ -1,7 +1,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Monsters = require(ReplicatedStorage.Shared.Config.Monsters)
 local DropTables = require(ReplicatedStorage.Shared.Config.DropTables)
 local PlayerStateService = require(script.Parent.PlayerStateService)
 
@@ -11,23 +10,36 @@ local EXP_GOLD_LEVEL_RANGE = 10
 
 local damageByMonster = {}
 
-local function getMonsterConfig(monster)
+local function getMonsterRewardData(monster)
 	if not monster then
 		return nil
 	end
-	return Monsters[monster.Name]
-		or (Monsters.DesignCatalog and Monsters.DesignCatalog[monster.Name])
-		or Monsters.Default
-end
 
-local function getMonsterLevel(monster, config)
-	if monster then
-		local levelAttribute = monster:GetAttribute("Level")
-		if typeof(levelAttribute) == "number" then
-			return levelAttribute
-		end
+	local configId = monster:GetAttribute("ConfigId")
+	if type(configId) ~= "string" or configId == "" then
+		return nil
 	end
-	return config and config.Level or 1
+
+	local exp = tonumber(monster:GetAttribute("RewardExp")) or 0
+	local gold = tonumber(monster:GetAttribute("RewardGold")) or 0
+	local boneChance = tonumber(monster:GetAttribute("RewardBoneChance")) or 0
+	local dropTable = monster:GetAttribute("RewardDropTable")
+	local monsterType = monster:GetAttribute("MonsterType")
+	local monsterLevel = tonumber(monster:GetAttribute("Level")) or 1
+	local lastHitBonePercent = tonumber(monster:GetAttribute("RewardLastHitBonePercent")) or 0.3
+	local damageContributionPercent = tonumber(monster:GetAttribute("RewardDamageContributionPercent")) or 0.7
+
+	return {
+		ConfigId = configId,
+		Exp = exp,
+		Gold = gold,
+		BoneChance = boneChance,
+		DropTable = dropTable,
+		Type = monsterType,
+		Level = monsterLevel,
+		LastHitBonePercent = lastHitBonePercent,
+		DamageContributionPercent = damageContributionPercent,
+	}
 end
 
 local function withinLevelRange(playerLevel, monsterLevel)
@@ -106,39 +118,35 @@ function RewardService:TrackDamage(monster, player, amount)
 end
 
 function RewardService:HandleMonsterDeath(monster)
-	local config = getMonsterConfig(monster)
-	if not config then
+	local rewardData = getMonsterRewardData(monster)
+	if not rewardData then
 		return
 	end
-	local rewards = config.Rewards or {}
-	local isBoss = config.Type == "Boss"
-	local monsterLevel = getMonsterLevel(monster, config)
+
+	local isBoss = rewardData.Type == "Boss"
 
 	local lastHitId = monster:GetAttribute("LastHitPlayerId")
 	local lastHitPlayer = lastHitId and Players:GetPlayerByUserId(lastHitId)
 
 	if lastHitPlayer then
 		local playerLevel = getPlayerLevel(lastHitPlayer)
-		if withinLevelRange(playerLevel, monsterLevel) then
-			PlayerStateService:AddExp(lastHitPlayer, rewards.Exp or 0)
-			PlayerStateService:AddGold(lastHitPlayer, rewards.Gold or 0)
+		if withinLevelRange(playerLevel, rewardData.Level) then
+			PlayerStateService:AddExp(lastHitPlayer, rewardData.Exp)
+			PlayerStateService:AddGold(lastHitPlayer, rewardData.Gold)
 		end
-		grantDrops(lastHitPlayer, rewards.DropTable)
+		grantDrops(lastHitPlayer, rewardData.DropTable)
 	end
 
-	local boneChance = rewards.BoneChance or 0
-	if boneChance > 0 and math.random() <= boneChance then
+	if rewardData.BoneChance > 0 and math.random() <= rewardData.BoneChance then
 		local damageEntry = damageByMonster[monster]
 		local baseBone = 1
 		if isBoss and damageEntry and damageEntry.total > 0 then
-			local lastHitPercent = rewards.LastHitBonePercent or 0.3
-			local contributionPercent = rewards.DamageContributionPercent or 0.7
 			for userId, damage in pairs(damageEntry.byPlayer) do
 				local player = Players:GetPlayerByUserId(userId)
 				if player then
-					local share = (damage / damageEntry.total) * contributionPercent
+					local share = (damage / damageEntry.total) * rewardData.DamageContributionPercent
 					if lastHitId and userId == lastHitId then
-						share += lastHitPercent
+						share += rewardData.LastHitBonePercent
 					end
 					grantCurrencyValue(player, "Bone", baseBone * share)
 				end

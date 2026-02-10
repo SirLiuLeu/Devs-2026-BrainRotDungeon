@@ -1,6 +1,8 @@
 local ClientState = {}
 ClientState.__index = ClientState
 
+local changedEvent = Instance.new("BindableEvent")
+
 local snapshot = {
 	Gold = 0,
 	Inventory = {},
@@ -20,6 +22,25 @@ function ClientState:ApplySnapshot(newSnapshot)
 		Level = newSnapshot.Level or 1,
 		Exp = newSnapshot.Exp or 0,
 		Pet = newSnapshot.Pet or {},
+	}
+
+	changedEvent:Fire(snapshot)
+end
+
+function ClientState:Subscribe(callback)
+	if typeof(callback) ~= "function" then
+		return nil
+	end
+	return changedEvent.Event:Connect(callback)
+end
+
+function ClientState:GetSnapshot()
+	return {
+		Gold = snapshot.Gold,
+		Inventory = snapshot.Inventory,
+		Level = snapshot.Level,
+		Exp = snapshot.Exp,
+		Pet = snapshot.Pet,
 	}
 end
 
