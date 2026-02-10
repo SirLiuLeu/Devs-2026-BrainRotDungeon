@@ -5,7 +5,6 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local Monsters = require(ReplicatedStorage.Shared.Config.Monsters)
 local DataConfig = require(ReplicatedStorage.Shared.Data.DataConfig)
 local DropResolver = require(ServerScriptService.Systems.DropResolver)
-local DropTables = require(ReplicatedStorage.Shared.Config.DropTables)
 local PlayerStateService = require(script.Parent.PlayerStateService)
 local InventoryService = require(script.Parent.InventoryService)
 local PetService = require(script.Parent.PetService)
@@ -121,6 +120,9 @@ end
 function RewardService:HandleMonsterDeath(monster)
 	local rewardData = getMonsterRewardData(monster)
 	if not rewardData then
+		if monster then
+			warn(string.format("[RewardService] Skip reward: missing or invalid ConfigId on %s", monster:GetFullName()))
+		end
 		return
 	end
 
@@ -135,11 +137,11 @@ function RewardService:HandleMonsterDeath(monster)
 			local player = Players:GetPlayerByUserId(userId)
 			if player and RoomService:CanInteract(player, monster) then
 				local share = damage / damageEntry.total
-				if withinLevelRange(getPlayerLevel(player), monsterLevel) then
-					grantExp(player, math.floor((rewards.Exp or 0) * share))
-					grantGold(player, math.floor((rewards.Gold or 0) * share))
+				if withinLevelRange(getPlayerLevel(player), rewardData.Level) then
+					grantExp(player, math.floor((rewardData.Exp or 0) * share))
+					grantGold(player, math.floor((rewardData.Gold or 0) * share))
 				end
-				grantDrops(player, rewards.DropTable, share)
+				grantDrops(player, rewardData.DropTable, share)
 				QuestService:RecordEvent(player, "KillBoss", { MonsterId = monster.Name })
 			end
 		end
