@@ -2,8 +2,6 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Weapons = require(ReplicatedStorage.Shared.Config.Weapons)
-local Monsters = require(ReplicatedStorage.Shared.Config.Monsters)
-
 local PlayerStateService = require(script.Parent.PlayerStateService)
 local RewardService = require(script.Parent.RewardService)
 local StatService = require(script.Parent.Parent.Systems.StatService)
@@ -36,16 +34,6 @@ local function getWeaponConfig(weaponId)
         return Weapons[weaponId]
     end
     return Weapons.Basic
-end
-
-local function getMonsterConfig(monsterName)
-    if Monsters[monsterName] then
-        return Monsters[monsterName]
-    end
-    if Monsters.DesignCatalog and Monsters.DesignCatalog[monsterName] then
-        return Monsters.DesignCatalog[monsterName]
-    end
-    return nil
 end
 
 function CombatService:ValidateAttack(player, target)
@@ -121,7 +109,6 @@ function CombatService:ApplyDamage(attacker, target, weaponId)
             return false
         end
 
-        local weaponConfig = getWeaponConfig(weaponId or attacker:GetAttribute("EquippedWeaponId"))
         local state = PlayerStateService:GetState(attacker)
         if not state then
             return false
@@ -140,8 +127,8 @@ function CombatService:ApplyDamage(attacker, target, weaponId)
         targetHumanoid:TakeDamage(damage)
         state.Cooldowns.Attack = os.clock()
 
-        local monsterConfig = getMonsterConfig(targetCharacter.Name)
-        if monsterConfig then
+        local monsterConfigId = targetCharacter:GetAttribute("ConfigId")
+        if type(monsterConfigId) == "string" and monsterConfigId ~= "" then
             targetCharacter:SetAttribute("LastHitPlayerId", attacker.UserId)
             RewardService:TrackDamage(targetCharacter, attacker, damage)
         end
@@ -150,16 +137,9 @@ function CombatService:ApplyDamage(attacker, target, weaponId)
     end
 
     if attacker:IsA("Model") then
-        local targetPlayer = Players:GetPlayerFromCharacter(targetCharacter)
-        if targetPlayer then
-            if not RoomService:CanInteract(attacker, targetPlayer) then
-                return false
-            end
-        elseif not RoomService:CanInteract(attacker, targetCharacter) then
-            return false
-        end
-        local monsterConfig = Monsters[attacker.Name] or Monsters.Default
-        local damage = monsterConfig.Damage or 0
+        local configFolder = attacker:FindFirstChild("Config")
+        local damageValue = configFolder and configFolder:FindFirstChild("Damage")
+        local damage = (damageValue and damageValue:IsA("NumberValue") and damageValue.Value) or 0
 
         local targetPlayer = Players:GetPlayerFromCharacter(targetCharacter)
         if targetPlayer then
@@ -221,8 +201,8 @@ function CombatService:ApplySkillDamage(player, target, skillConfig, weaponId)
 
     targetHumanoid:TakeDamage(damage)
 
-    local monsterConfig = getMonsterConfig(targetCharacter.Name)
-    if monsterConfig then
+    local monsterConfigId = targetCharacter:GetAttribute("ConfigId")
+    if type(monsterConfigId) == "string" and monsterConfigId ~= "" then
         targetCharacter:SetAttribute("LastHitPlayerId", player.UserId)
         RewardService:TrackDamage(targetCharacter, player, damage)
     end

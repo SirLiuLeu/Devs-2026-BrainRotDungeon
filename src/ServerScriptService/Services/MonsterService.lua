@@ -8,13 +8,29 @@ local RoomService = require(script.Parent.RoomService)
 
 local MonsterService = {}
 
+local defaultMonsterConfig = Monsters.GetById("Default")
+
 local function getMonsterConfig(monster)
-	return Monsters[monster.Name]
-		or (Monsters.DesignCatalog and Monsters.DesignCatalog[monster.Name])
-		or Monsters.Default
+	if not monster then
+		return nil, nil
+	end
+
+	local configId = monster:GetAttribute("ConfigId")
+	if type(configId) ~= "string" or configId == "" then
+		warn(string.format("[MonsterService] Missing ConfigId on monster %s", monster:GetFullName()))
+		return nil, nil
+	end
+
+	local config = Monsters.GetById(configId)
+	if not config then
+		warn(string.format("[MonsterService] Invalid ConfigId '%s' on monster %s", configId, monster:GetFullName()))
+		return nil, configId
+	end
+
+	return config, configId
 end
 
-local function applyMonsterConfig(monster, configData)
+local function applyMonsterConfig(monster, configData, configId)
 	local config = monster:FindFirstChild("Config")
 	if not config then
 		config = Instance.new("Folder")
@@ -33,18 +49,31 @@ local function applyMonsterConfig(monster, configData)
 		return valueObject
 	end
 
-	local stats = configData.Stats or configData
-	local attackRangeValue = setConfigValue("AttackRange", stats.AttackRange or stats.Range or 5)
-	local aggroRangeValue = setConfigValue("AggroRange", stats.AggroRange or 25)
-	local damageValue = setConfigValue("Damage", stats.Damage or 10)
-	local cooldownValue = setConfigValue("AttackCooldown", stats.Cooldown or stats.AttackCooldown or 1)
+	local stats = configData.Stats
+	local rewards = configData.Rewards
+
+	local attackRangeValue = setConfigValue("AttackRange", stats.AttackRange)
+	local aggroRangeValue = setConfigValue("AggroRange", stats.AggroRange or (defaultMonsterConfig and defaultMonsterConfig.Stats.AggroRange) or 0)
+	local damageValue = setConfigValue("Damage", stats.Damage)
+	local cooldownValue = setConfigValue("AttackCooldown", stats.Cooldown)
+
+	monster:SetAttribute("ConfigId", configId)
+	monster:SetAttribute("MonsterType", configData.Type)
+	monster:SetAttribute("AttackType", stats.AttackType)
+	monster:SetAttribute("RewardExp", rewards.Exp)
+	monster:SetAttribute("RewardGold", rewards.Gold)
+	monster:SetAttribute("RewardBoneChance", rewards.BoneChance)
+	monster:SetAttribute("RewardDropTable", rewards.DropTable)
+	monster:SetAttribute("RewardLastHitBonePercent", rewards.LastHitBonePercent)
+	monster:SetAttribute("RewardDamageContributionPercent", rewards.DamageContributionPercent)
+
+	if typeof(configData.Level) == "number" and monster:GetAttribute("Level") == nil then
+		monster:SetAttribute("Level", configData.Level)
+	end
 
 	local humanoid = monster:FindFirstChild("Humanoid")
-	if humanoid and stats.HP then
+	if humanoid then
 		humanoid.MaxHealth = stats.HP
-		humanoid.Health = humanoid.MaxHealth
-	elseif humanoid and configData.MaxHP then
-		humanoid.MaxHealth = configData.MaxHP
 		humanoid.Health = humanoid.MaxHealth
 	end
 
@@ -88,9 +117,12 @@ local function setupMonster(monster, enemies)
 	end
 	monster.PrimaryPart = primaryPart
 
-	local configData = getMonsterConfig(monster)
-	RoomService:AssignEnemy(monster, monster:GetAttribute("RoomId") or 0)
-	local _, attackRangeValue, aggroRangeValue, damageValue, cooldownValue = applyMonsterConfig(monster, configData)
+	local configData, configId = getMonsterConfig(monster)
+	if not configData then
+		return
+	end
+
+	local _, attackRangeValue, aggroRangeValue, damageValue, cooldownValue = applyMonsterConfig(monster, configData, configId)
 	if not attackRangeValue or not aggroRangeValue or not damageValue or not cooldownValue then
 		return
 	end
