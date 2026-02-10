@@ -1,7 +1,7 @@
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Progression = require(ReplicatedStorage.Shared.Config.Progression)
+local RankingService = require(script.Parent.RankingService)
 
 local Remotes = ReplicatedStorage.Shared:FindFirstChild("Remotes")
 local StateUpdate = Remotes and Remotes:FindFirstChild("StateUpdate")
@@ -17,8 +17,8 @@ local ALLOCATED_MULTIPLIERS = {
     Agility = { MoveSpeed = 0.1 },
 }
 
-local function getLevelConfig(level)
-    return Progression.Levels[level]
+local function getLevelConfig(level, rebirth)
+    return Progression.GetLevelConfig(level, rebirth or 0)
 end
 
 local function buildBaseStats(levelConfig)
@@ -103,6 +103,8 @@ local function snapshotState(player, state)
         Level = getValueObjectValue(data, "Level", state.Level),
         Exp = getValueObjectValue(data, "Exp", state.Exp),
         Gold = getValueObjectValue(data, "Gold", state.Gold),
+        Bone = getValueObjectValue(data, "Bone", state.Bone),
+        Rebirth = getValueObjectValue(data, "Rebirth", state.Rebirth),
         StatPoints = state.StatPoints,
         AllocatedStats = {
             Strength = state.AllocatedStats.Strength,
@@ -133,7 +135,7 @@ function PlayerStateService:GetState(player)
         return state
     end
 
-    local levelConfig = getLevelConfig(1)
+    local levelConfig = getLevelConfig(1, 0)
     if not levelConfig then
         return nil
     end
@@ -142,6 +144,8 @@ function PlayerStateService:GetState(player)
         Level = 1,
         Exp = 0,
         Gold = 0,
+        Bone = 0,
+        Rebirth = 0,
         StatPoints = 0,
         BaseStats = buildBaseStats(levelConfig),
         AllocatedStats = {
@@ -177,6 +181,11 @@ function PlayerStateService:Replicate(player)
     end
 
     state.FinalStats = buildFinalStats(state)
+    RankingService:UpdatePlayer(player, {
+        Level = state.Level,
+        Rebirth = state.Rebirth,
+        Power = (state.FinalStats.Damage or 0) + (state.FinalStats.MaxHP or 0),
+    })
     StateUpdate:FireClient(player, snapshotState(player, state))
 end
 
@@ -233,8 +242,10 @@ function PlayerStateService:_trackData(player, data)
     end
 
     self:_trackValueObject(player, data:FindFirstChild("Gold"))
+    self:_trackValueObject(player, data:FindFirstChild("Bone"))
     self:_trackValueObject(player, data:FindFirstChild("Exp"))
     self:_trackValueObject(player, data:FindFirstChild("Level"))
+    self:_trackValueObject(player, data:FindFirstChild("Rebirth"))
     self:_trackValueObject(player, data:FindFirstChild("StatPoints"))
     self:_trackContainer(player, data:FindFirstChild("AllocatedStats"))
     self:_trackContainer(player, data:FindFirstChild("Inventory"))
@@ -264,6 +275,8 @@ function PlayerStateService:SyncProgressionValues(player)
     setValueObject(data, "Level", state.Level)
     setValueObject(data, "Exp", state.Exp)
     setValueObject(data, "Gold", state.Gold)
+    setValueObject(data, "Bone", state.Bone)
+    setValueObject(data, "Rebirth", state.Rebirth)
     setValueObject(data, "StatPoints", state.StatPoints)
     local allocated = data:FindFirstChild("AllocatedStats")
     if allocated then
@@ -292,6 +305,46 @@ function PlayerStateService:_trackPlayer(player)
     end))
 end
 
+function PlayerStateService:ApplyProfile(player, profile)
+    local state = self:GetState(player)
+    if not state or typeof(profile) ~= "table" then
+        return
+    end
+
+    local progression = profile.Progression or {}
+    local currency = profile.Currency or {}
+
+    state.Level = math.max(1, tonumber(progression.Level) or state.Level)
+    state.Exp = math.max(0, tonumber(progression.Exp) or state.Exp)
+    state.Rebirth = math.max(0, tonumber(progression.Rebirth) or state.Rebirth)
+    state.StatPoints = math.max(0, tonumber(progression.StatPoints) or state.StatPoints)
+    state.AllocatedStats.Strength = tonumber((progression.AllocatedStats or {}).Strength) or 0
+    state.AllocatedStats.Vitality = tonumber((progression.AllocatedStats or {}).Vitality) or 0
+    state.AllocatedStats.Agility = tonumber((progression.AllocatedStats or {}).Agility) or 0
+
+    state.Gold = math.max(0, tonumber(currency.Gold) or state.Gold)
+    state.Bone = math.max(0, tonumber(currency.Bone) or state.Bone)
+
+    local levelConfig = getLevelConfig(state.Level, state.Rebirth)
+    if levelConfig then
+        state.BaseStats = buildBaseStats(levelConfig)
+    end
+
+    self:SyncProgressionValues(player)
+    self:Replicate(player)
+end
+
+function PlayerStateService:CleanupPlayer(player)
+    self.States[player] = nil
+    local connections = self._connections[player]
+    if connections then
+        for _, connection in ipairs(connections) do
+            connection:Disconnect()
+        end
+    end
+    self._connections[player] = nil
+end
+
 function PlayerStateService:AddExp(player, amount)
     local state = self:GetState(player)
     if not state then
@@ -306,7 +359,7 @@ function PlayerStateService:AddExp(player, amount)
     state.Exp += gain
 
     while true do
-        local levelConfig = getLevelConfig(state.Level)
+        local levelConfig = getLevelConfig(state.Level, state.Rebirth)
         local expToNext = levelConfig and levelConfig.ExpToNext
         if not expToNext or expToNext <= 0 then
             break
@@ -314,7 +367,7 @@ function PlayerStateService:AddExp(player, amount)
         if state.Exp < expToNext then
             break
         end
-        if not getLevelConfig(state.Level + 1) then
+        if not getLevelConfig(state.Level + 1, state.Rebirth) then
             state.Exp = expToNext
             break
         end
@@ -322,6 +375,22 @@ function PlayerStateService:AddExp(player, amount)
         self:LevelUp(player)
     end
 
+    self:SyncProgressionValues(player)
+    self:Replicate(player)
+end
+
+function PlayerStateService:AddBone(player, amount)
+    local state = self:GetState(player)
+    if not state then
+        return
+    end
+
+    local gain = tonumber(amount) or 0
+    if gain <= 0 then
+        return
+    end
+
+    state.Bone += gain
     self:SyncProgressionValues(player)
     self:Replicate(player)
 end
@@ -418,12 +487,22 @@ function PlayerStateService:SetEquippedWeapon(player, weaponId, weaponStats)
     self:Replicate(player)
 end
 
+function PlayerStateService:SetEquipmentStats(player, equipmentStats)
+    local state = self:GetState(player)
+    if not state then
+        return
+    end
+    state.EquipmentStats = equipmentStats or {}
+    self:Replicate(player)
+end
+
 function PlayerStateService:Rebirth(player)
     local state = self:GetState(player)
     if not state then
         return
     end
     state.Exp = 0
+    state.Rebirth += 1
     self:SyncProgressionValues(player)
     self:Replicate(player)
 end
@@ -434,7 +513,7 @@ function PlayerStateService:LevelUp(player)
         return
     end
 
-    local nextLevelConfig = getLevelConfig(state.Level + 1)
+    local nextLevelConfig = getLevelConfig(state.Level + 1, state.Rebirth)
     if not nextLevelConfig then
         return
     end
@@ -445,22 +524,5 @@ function PlayerStateService:LevelUp(player)
     self:SyncProgressionValues(player)
     self:Replicate(player)
 end
-
-Players.PlayerRemoving:Connect(function(player)
-    PlayerStateService.States[player] = nil
-    local connections = PlayerStateService._connections[player]
-    if connections then
-        for _, connection in ipairs(connections) do
-            connection:Disconnect()
-        end
-    end
-    PlayerStateService._connections[player] = nil
-end)
-
-Players.PlayerAdded:Connect(function(player)
-    PlayerStateService:GetState(player)
-    PlayerStateService:_trackPlayer(player)
-    PlayerStateService:Replicate(player)
-end)
 
 return PlayerStateService

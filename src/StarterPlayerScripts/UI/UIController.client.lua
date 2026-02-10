@@ -1,0 +1,1 @@
+-- UI controller placeholder for future UI bindings.

@@ -1,7 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local clientRoot = script.Parent.Parent:WaitForChild("Client")
-local ClientState = require(clientRoot:WaitForChild("ClientState"))
+local ClientState = require(script.Parent:WaitForChild("ClientState"))
 
 local Remotes = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Remotes")
 local StateUpdate = Remotes:WaitForChild("StateUpdate")

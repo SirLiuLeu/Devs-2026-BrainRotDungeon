@@ -7,6 +7,7 @@ local Monsters = require(ReplicatedStorage.Shared.Config.Monsters)
 local PlayerStateService = require(script.Parent.PlayerStateService)
 local RewardService = require(script.Parent.RewardService)
 local StatService = require(script.Parent.Parent.Systems.StatService)
+local RoomService = require(script.Parent.RoomService)
 
 local CombatService = {}
 
@@ -61,6 +62,15 @@ function CombatService:ValidateAttack(player, target)
 
     local targetCharacter = resolveCharacter(target)
     if not targetCharacter then
+        return false
+    end
+
+    local targetPlayer = Players:GetPlayerFromCharacter(targetCharacter)
+    if targetPlayer then
+        if not RoomService:CanInteract(player, targetPlayer) then
+            return false
+        end
+    elseif not RoomService:CanInteract(player, targetCharacter) then
         return false
     end
 
@@ -140,6 +150,14 @@ function CombatService:ApplyDamage(attacker, target, weaponId)
     end
 
     if attacker:IsA("Model") then
+        local targetPlayer = Players:GetPlayerFromCharacter(targetCharacter)
+        if targetPlayer then
+            if not RoomService:CanInteract(attacker, targetPlayer) then
+                return false
+            end
+        elseif not RoomService:CanInteract(attacker, targetCharacter) then
+            return false
+        end
         local monsterConfig = Monsters[attacker.Name] or Monsters.Default
         local damage = monsterConfig.Damage or 0
 
@@ -169,6 +187,14 @@ function CombatService:ApplySkillDamage(player, target, skillConfig, weaponId)
 
     local targetCharacter = resolveCharacter(target)
     if not targetCharacter then
+        return false
+    end
+    local targetPlayer = Players:GetPlayerFromCharacter(targetCharacter)
+    if targetPlayer then
+        if not RoomService:CanInteract(player, targetPlayer) then
+            return false
+        end
+    elseif not RoomService:CanInteract(player, targetCharacter) then
         return false
     end
     local targetHumanoid = targetCharacter:FindFirstChild("Humanoid")

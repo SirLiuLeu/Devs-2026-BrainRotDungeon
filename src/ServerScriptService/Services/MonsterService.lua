@@ -4,6 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Monsters = require(ReplicatedStorage.Shared.Config.Monsters)
 local CombatService = require(script.Parent.CombatService)
 local RewardService = require(script.Parent.RewardService)
+local RoomService = require(script.Parent.RoomService)
 
 local MonsterService = {}
 
@@ -56,7 +57,7 @@ local function getNearestPlayer(monster, range)
 		local char = plr.Character
 		local hrp = char and char:FindFirstChild("HumanoidRootPart")
 		local hum = char and char:FindFirstChild("Humanoid")
-		if hrp and hum and hum.Health > 0 then
+		if hrp and hum and hum.Health > 0 and RoomService:CanInteract(plr, monster) then
 			local dist = (hrp.Position - monster.PrimaryPart.Position).Magnitude
 			if dist < minDist then
 				nearest, minDist = char, dist
@@ -88,6 +89,7 @@ local function setupMonster(monster, enemies)
 	monster.PrimaryPart = primaryPart
 
 	local configData = getMonsterConfig(monster)
+	RoomService:AssignEnemy(monster, monster:GetAttribute("RoomId") or 0)
 	local _, attackRangeValue, aggroRangeValue, damageValue, cooldownValue = applyMonsterConfig(monster, configData)
 	if not attackRangeValue or not aggroRangeValue or not damageValue or not cooldownValue then
 		return
@@ -111,6 +113,13 @@ local function setupMonster(monster, enemies)
 
 	humanoid.Died:Connect(function()
 		RewardService:HandleMonsterDeath(monster)
+	end)
+
+	monster.AncestryChanged:Connect(function(_, parent)
+		if not parent then
+			RewardService:ClearMonster(monster)
+			RoomService:ClearEntity(monster)
+		end
 	end)
 
 	local function stopRun()

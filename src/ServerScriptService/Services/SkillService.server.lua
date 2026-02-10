@@ -8,6 +8,7 @@ local PlayerStateService = require(ServerScriptService.Services.PlayerStateServi
 local StatService = require(ServerScriptService.Systems.StatService)
 local SkillConfig = require(ReplicatedStorage.Shared.Config.Skills)
 local Weapons = require(ReplicatedStorage.Shared.Config.Weapons)
+local RoomService = require(ServerScriptService.Services.RoomService)
 
 local function getWeaponConfig(weaponId)
 	return Weapons[weaponId] or Weapons.Basic
@@ -35,7 +36,7 @@ local function getTargetsInRange(player, range, targeting)
 	for _, enemy in ipairs(workspace.Enemies:GetChildren()) do
 		local eh = enemy:FindFirstChildOfClass("Humanoid")
 		local erp = enemy:FindFirstChild("HumanoidRootPart")
-		if eh and erp and eh.Health > 0 then
+		if eh and erp and eh.Health > 0 and RoomService:CanInteract(player, enemy) then
 			local dist = (erp.Position - hrp.Position).Magnitude
 			if dist <= (range or 0) then
 				if targeting == "Single" then

@@ -1,13 +1,20 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 
 local Monsters = require(ReplicatedStorage.Shared.Config.Monsters)
-local DropTables = require(ReplicatedStorage.Shared.Config.DropTables)
+local DataConfig = require(ReplicatedStorage.Shared.Data.DataConfig)
+local DropResolver = require(ServerScriptService.Systems.DropResolver)
 local PlayerStateService = require(script.Parent.PlayerStateService)
+local InventoryService = require(script.Parent.InventoryService)
+local PetService = require(script.Parent.PetService)
+local QuestService = require(script.Parent.QuestService)
+local RoomService = require(script.Parent.RoomService)
 
 local RewardService = {}
 
-local EXP_GOLD_LEVEL_RANGE = 10
+local EXP_GOLD_LEVEL_RANGE = DataConfig.Rules.ExpGoldLevelRange or 10
+local REBIRTH_GOLD_BONUS = DataConfig.Rules.RebirthGoldBonus or 0
 
 local damageByMonster = {}
 
@@ -39,57 +46,45 @@ local function getPlayerLevel(player)
 	return state and state.Level or 1
 end
 
-local function grantCurrencyValue(player, name, amount)
-	if not player or amount == 0 then
-		return
-	end
-	local data = player:FindFirstChild("Data")
-	if not data then
-		return
-	end
-	local valueObject = data:FindFirstChild(name)
-	if valueObject and valueObject:IsA("ValueBase") then
-		valueObject.Value += amount
-	end
+local function getRebirth(player)
+	local state = PlayerStateService:GetState(player)
+	return state and state.Rebirth or 0
 end
 
-local function rollDropTable(tableId)
-	local dropTable = DropTables and DropTables[tableId]
-	if not dropTable then
-		return {}
-	end
-	local drops = {}
-	for _, entry in ipairs(dropTable) do
-		local itemId = entry.ItemId
-		local chance = entry.Chance or 0
-		if itemId and chance > 0 and math.random() <= chance then
-			table.insert(drops, itemId)
+local function grantGold(player, baseAmount)
+	local rebirth = getRebirth(player)
+	local bonusMultiplier = 1 + rebirth * REBIRTH_GOLD_BONUS
+	PlayerStateService:AddGold(player, math.floor((baseAmount or 0) * bonusMultiplier))
+end
+
+local function grantExp(player, amount)
+	PlayerStateService:AddExp(player, amount or 0)
+end
+
+local function grantBone(player, amount)
+	PlayerStateService:AddBone(player, amount or 0)
+end
+
+local function grantDrops(player, dropTableId, rollMultiplier)
+	local drops = DropResolver.Resolve(dropTableId, { RollMultiplier = rollMultiplier })
+	for _, drop in ipairs(drops) do
+		if drop.ItemId == "Bone" then
+			grantBone(player, 1)
+		elseif drop.ItemId == "Gold" then
+			grantGold(player, 1)
+		elseif drop.Type == "Pet" then
+			PetService:AddPet(player, drop.ItemId)
+		else
+			InventoryService:AddItem(player, drop.ItemId, drop.Type, drop.Rarity)
 		end
-	end
-	return drops
-end
-
-local function grantDrops(player, dropTableId)
-	local drops = rollDropTable(dropTableId)
-	if #drops == 0 then
-		return
-	end
-	local data = player:FindFirstChild("Data")
-	local inventory = data and data:FindFirstChild("Inventory")
-	local items = inventory and inventory:FindFirstChild("Items")
-	if not items then
-		return
-	end
-	for _, itemId in ipairs(drops) do
-		local valueObject = Instance.new("StringValue")
-		valueObject.Name = itemId
-		valueObject.Value = itemId
-		valueObject.Parent = items
 	end
 end
 
 function RewardService:TrackDamage(monster, player, amount)
 	if not monster or not player then
+		return
+	end
+	if not RoomService:CanInteract(player, monster) then
 		return
 	end
 	local damageEntry = damageByMonster[monster]
@@ -105,6 +100,10 @@ function RewardService:TrackDamage(monster, player, amount)
 	damageEntry.byPlayer[player.UserId] = (damageEntry.byPlayer[player.UserId] or 0) + gain
 end
 
+function RewardService:ClearMonster(monster)
+	damageByMonster[monster] = nil
+end
+
 function RewardService:HandleMonsterDeath(monster)
 	local config = getMonsterConfig(monster)
 	if not config then
@@ -117,34 +116,48 @@ function RewardService:HandleMonsterDeath(monster)
 	local lastHitId = monster:GetAttribute("LastHitPlayerId")
 	local lastHitPlayer = lastHitId and Players:GetPlayerByUserId(lastHitId)
 
-	if lastHitPlayer then
+	local damageEntry = damageByMonster[monster]
+	if isBoss and damageEntry and damageEntry.total > 0 then
+		for userId, damage in pairs(damageEntry.byPlayer) do
+			local player = Players:GetPlayerByUserId(userId)
+			if player and RoomService:CanInteract(player, monster) then
+				local share = damage / damageEntry.total
+				if withinLevelRange(getPlayerLevel(player), monsterLevel) then
+					grantExp(player, math.floor((rewards.Exp or 0) * share))
+					grantGold(player, math.floor((rewards.Gold or 0) * share))
+				end
+				grantDrops(player, rewards.DropTable, share)
+				QuestService:RecordEvent(player, "KillBoss", { MonsterId = monster.Name })
+			end
+		end
+	elseif lastHitPlayer and RoomService:CanInteract(lastHitPlayer, monster) then
 		local playerLevel = getPlayerLevel(lastHitPlayer)
 		if withinLevelRange(playerLevel, monsterLevel) then
-			PlayerStateService:AddExp(lastHitPlayer, rewards.Exp or 0)
-			PlayerStateService:AddGold(lastHitPlayer, rewards.Gold or 0)
+			grantExp(lastHitPlayer, rewards.Exp or 0)
+			grantGold(lastHitPlayer, rewards.Gold or 0)
 		end
-		grantDrops(lastHitPlayer, rewards.DropTable)
+		grantDrops(lastHitPlayer, rewards.DropTable, 1)
+		QuestService:RecordEvent(lastHitPlayer, "KillMonster", { MonsterId = monster.Name })
 	end
 
 	local boneChance = rewards.BoneChance or 0
 	if boneChance > 0 and math.random() <= boneChance then
-		local damageEntry = damageByMonster[monster]
 		local baseBone = 1
 		if isBoss and damageEntry and damageEntry.total > 0 then
 			local lastHitPercent = rewards.LastHitBonePercent or 0.3
 			local contributionPercent = rewards.DamageContributionPercent or 0.7
 			for userId, damage in pairs(damageEntry.byPlayer) do
 				local player = Players:GetPlayerByUserId(userId)
-				if player then
+				if player and RoomService:CanInteract(player, monster) then
 					local share = (damage / damageEntry.total) * contributionPercent
 					if lastHitId and userId == lastHitId then
 						share += lastHitPercent
 					end
-					grantCurrencyValue(player, "Bone", baseBone * share)
+					grantBone(player, baseBone * share)
 				end
 			end
 		elseif lastHitPlayer then
-			grantCurrencyValue(lastHitPlayer, "Bone", baseBone)
+			grantBone(lastHitPlayer, baseBone)
 		end
 	end
 

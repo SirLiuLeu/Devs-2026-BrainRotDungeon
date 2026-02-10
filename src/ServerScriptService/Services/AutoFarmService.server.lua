@@ -4,6 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CombatService = require(script.Parent.CombatService)
 local PlayerStateService = require(script.Parent.PlayerStateService)
 local Weapons = require(ReplicatedStorage.Shared.Config.Weapons)
+local RoomService = require(script.Parent.RoomService)
 
 local Remotes = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Remotes")
 local AutoFarmRemote = Remotes:FindFirstChild("AutoFarmToggle")
@@ -37,7 +38,7 @@ local function findTarget(player)
 	for _, enemy in ipairs(enemies:GetChildren()) do
 		local eh = enemy:FindFirstChildOfClass("Humanoid")
 		local erp = enemy:FindFirstChild("HumanoidRootPart")
-		if eh and erp and eh.Health > 0 then
+		if eh and erp and eh.Health > 0 and RoomService:CanInteract(player, enemy) then
 			local dist = (erp.Position - hrp.Position).Magnitude
 			if dist <= closestDist then
 				closest = enemy

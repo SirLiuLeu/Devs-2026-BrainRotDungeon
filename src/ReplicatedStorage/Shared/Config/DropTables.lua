@@ -1,5 +1,0 @@
-return {
-	BrainrotBasic = {},
-	BrainrotElite = {},
-	BrainrotBoss = {},
-}
